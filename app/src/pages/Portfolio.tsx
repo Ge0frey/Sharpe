@@ -1,0 +1,184 @@
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { PublicKey } from '@solana/web3.js'
+import { useClv } from '../state/useClv'
+import { listPredictions, settleClose, settleOutcome } from '../chain/actions'
+import { txline } from '../lib/txline'
+import { DEMO_FIXTURE_META } from '../config'
+import { pickOdds } from '../lib/domain'
+import { Card, Button, Badge, CLV } from '../components/ui'
+import Icon from '../components/Icon'
+import { CountUp } from '../components/motion'
+import { Sparkline, Meter } from '../components/graphics'
+import VerifyModal from '../components/VerifyModal'
+
+const MARKET_LABEL = ['Home win', 'Draw', 'Away win']
+const statusKey = (s: any) => Object.keys(s ?? {})[0] ?? 'unknown'
+
+export default function Portfolio() {
+  const { clv, wallet, connected } = useClv()
+  const qc = useQueryClient()
+  const [busy, setBusy] = useState<string | null>(null)
+  const [verify, setVerify] = useState<{ pred: any; fixture: any } | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+
+  const { data: preds = [], isLoading } = useQuery({ queryKey: ['predictions'], queryFn: () => listPredictions(clv) })
+  const { data: fixtures = [] } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
+  const fixtureOf = (id: number) => fixtures.find((f: any) => f.FixtureId === id) ?? DEMO_FIXTURE_META.find((f) => f.FixtureId === id)
+
+  const mine = connected ? preds.filter((p: any) => p.predictor.toBase58() === wallet!.publicKey.toBase58()) : preds
+  const sorted = [...mine].sort((a: any, b: any) => Number(b.createdAt) - Number(a.createdAt))
+
+  // Real summary metrics + cumulative CLV series (chronological).
+  let cumClv = 0, closedCount = 0, settledCount = 0, wins = 0
+  const series: number[] = [0]
+  const chrono = [...mine].sort((a: any, b: any) => Number(a.createdAt) - Number(b.createdAt))
+  for (const p of chrono) {
+    const st = statusKey(p.status)
+    if (st === 'closed' || st === 'settled') { cumClv += Number(p.clvBps); closedCount++; series.push(cumClv) }
+    if (st === 'settled') { settledCount++; if (p.outcomeWin) wins++ }
+  }
+  const hitRate = settledCount ? Math.round((wins / settledCount) * 100) : 0
+
+  async function doSettleClose(p: any) {
+    setBusy(p.pubkey); setErr(null)
+    try {
+      const fx = fixtureOf(Number(p.fixtureId))
+      const start = Number(fx.StartTime)
+      const closeRec = (await pickOdds(Number(p.fixtureId), start - 60_000)) ?? (await pickOdds(Number(p.fixtureId), start - 300_000)) ?? (await pickOdds(Number(p.fixtureId), start - 900_000))
+      if (!closeRec) throw new Error('no closing line found')
+      await settleClose(clv, new PublicKey(p.pubkey), closeRec, p.selection)
+      qc.invalidateQueries({ queryKey: ['predictions'] })
+    } catch (e: any) { setErr(e?.message ?? String(e)) } finally { setBusy(null) }
+  }
+  async function doSettleOutcome(p: any) {
+    setBusy(p.pubkey); setErr(null)
+    try {
+      await settleOutcome(clv, new PublicKey(p.pubkey), Number(p.fixtureId))
+      qc.invalidateQueries({ queryKey: ['predictions'] })
+    } catch (e: any) { setErr(e?.message ?? String(e)) } finally { setBusy(null) }
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <header className="mb-8 reveal">
+        <div className="flex items-center gap-4 mb-3">
+          <span className="font-num text-sm font-bold text-[#FF6B35]/60">01</span>
+          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#1E3A5F]">Your Portfolio</h1>
+        </div>
+        <p className="text-lg text-slate-600 max-w-2xl">
+          {connected
+            ? <>Every settled call is scored by <span className="text-[#FF6B35] font-bold">Closing Line Value</span> — the definitive benchmark of betting skill.</>
+            : <>Connect a wallet to make and settle calls. Showing <span className="text-[#1E3A5F] font-bold">all predictions</span> on the program.</>}
+        </p>
+      </header>
+
+      {/* Stat strip */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <Card className="p-5 reveal md:col-span-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cumulative CLV</div>
+              <div className="text-3xl font-display font-extrabold mt-1">
+                {closedCount
+                  ? <CountUp value={cumClv} className={cumClv >= 0 ? 'text-emerald-500' : 'text-red-500'} format={(n) => `${n >= 0 ? '+' : ''}${(n / 100).toFixed(2)}%`} />
+                  : <span className="text-slate-300">—</span>}
+              </div>
+            </div>
+            {series.length > 2 && <Sparkline points={series} className="w-28 h-9" stroke={cumClv >= 0 ? '#10B981' : '#EF4444'} />}
+          </div>
+        </Card>
+        <Card className="p-5 reveal" style={{ animationDelay: '70ms' }}>
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hit rate</div>
+          <div className="text-3xl font-display font-extrabold text-[#1E3A5F] mt-1 tabular">
+            {settledCount ? <CountUp value={hitRate} format={(n) => `${Math.round(n)}%`} /> : <span className="text-slate-300">—</span>}
+          </div>
+          <div className="text-xs text-slate-400 mt-1">{settledCount} settled call{settledCount === 1 ? '' : 's'}</div>
+        </Card>
+        <Card className="p-5 reveal" style={{ animationDelay: '140ms' }}>
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Open calls</div>
+          <div className="text-3xl font-display font-extrabold text-[#1E3A5F] mt-1 tabular">
+            <CountUp value={mine.length} />
+          </div>
+          <div className="text-xs text-slate-400 mt-1">{closedCount} scored</div>
+        </Card>
+      </div>
+
+      {err && (
+        <div className="mb-4 bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3 break-words flex items-start gap-2">
+          <Icon icon="lucide:triangle-alert" className="mt-0.5 shrink-0" /> {err}
+        </div>
+      )}
+      {isLoading && <p className="text-slate-400">Loading…</p>}
+      {!isLoading && sorted.length === 0 && (
+        <Card className="p-12 text-center">
+          <Icon icon="lucide:inbox" className="text-4xl text-slate-300" />
+          <p className="text-slate-400 mt-3">No predictions yet. Pick a match and lock a line.</p>
+        </Card>
+      )}
+
+      <div className="space-y-3">
+        {sorted.map((p: any, i: number) => {
+          const fx = fixtureOf(Number(p.fixtureId))
+          const st = statusKey(p.status)
+          const settled = st === 'settled'
+          const closed = st === 'closed'
+          return (
+            <Card key={p.pubkey} className="p-5 reveal" style={{ animationDelay: `${i * 55}ms` }}>
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                <div className="min-w-[200px]">
+                  <div className="font-bold text-[#1E3A5F]">{fx ? `${fx.Participant1} vs ${fx.Participant2}` : `Fixture ${p.fixtureId}`}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">Selection · <span className="text-[#FF6B35] font-semibold">{MARKET_LABEL[p.selection]}</span></div>
+                </div>
+                <Stat label="Entry" value={`${(p.entryProbBps / 100).toFixed(2)}%`} />
+                <Stat label="Close" value={p.closeProbBps ? `${(p.closeProbBps / 100).toFixed(2)}%` : '—'} />
+                <div className="min-w-[120px]">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">CLV</div>
+                  <div className="font-num text-sm mt-0.5">{p.closeProbBps ? <CLV bps={Number(p.clvBps)} /> : <span className="text-slate-300">—</span>}</div>
+                  {!!p.closeProbBps && <div className="mt-1.5"><Meter bps={Number(p.clvBps)} /></div>}
+                </div>
+                <Stat label="Result" value={settled ? (p.outcomeWin ? <Badge tone="green">Won</Badge> : <Badge tone="red">Lost</Badge>) : <span className="text-slate-300">—</span>} />
+                <div className="ml-auto flex items-center gap-2">
+                  {st === 'entryProven' && <Badge tone="amber">Entry proven</Badge>}
+                  {st === 'entryProven' && <Button variant="outline" disabled={busy === p.pubkey} onClick={() => doSettleClose(p)}>{busy === p.pubkey ? '…' : 'Settle close'}</Button>}
+                  {closed && <Button variant="outline" disabled={busy === p.pubkey} onClick={() => doSettleOutcome(p)}>{busy === p.pubkey ? '…' : 'Settle result'}</Button>}
+                  {(closed || settled) && (
+                    <Button onClick={() => setVerify({ pred: p, fixture: fx })}>
+                      <span className="inline-flex items-center gap-1.5"><Icon icon="lucide:file-check" /> Verify</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Info */}
+      <div className="mt-10 bg-white/70 ring-inset rounded-2xl p-6 flex gap-4 items-start">
+        <div className="w-10 h-10 rounded-xl bg-[#1E3A5F]/8 flex items-center justify-center shrink-0">
+          <Icon icon="lucide:info" className="text-lg text-[#1E3A5F]" />
+        </div>
+        <div>
+          <h3 className="font-bold text-[#1E3A5F] mb-1">How is CLV calculated?</h3>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            CLV = closing implied probability − entry implied probability, for the side you picked. A positive result means you secured a better price
+            than the final market consensus before kickoff — the gold standard for identifying long-term skill over short-term luck.
+          </p>
+        </div>
+      </div>
+
+      {verify && <VerifyModal pred={verify.pred} fixture={verify.fixture} onClose={() => setVerify(null)} />}
+    </div>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{label}</div>
+      <div className="font-num text-sm font-semibold text-[#1E3A5F] mt-0.5">{value}</div>
+    </div>
+  )
+}
