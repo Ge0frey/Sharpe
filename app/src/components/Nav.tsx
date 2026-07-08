@@ -4,8 +4,8 @@ import Icon from './Icon'
 
 export default function Nav() {
   const loc = useLocation()
-  const link = (to: string, label: string) => {
-    const active = loc.pathname === to
+  const link = (to: string, label: string, prefix?: string) => {
+    const active = prefix ? loc.pathname.startsWith(prefix) : loc.pathname === to
     return (
       <Link to={to} className={`text-sm transition-colors ${
         active
@@ -23,10 +23,10 @@ export default function Nav() {
             <div className="w-8 h-8 rounded-lg bg-[#1E3A5F] flex items-center justify-center">
               <Icon icon="lucide:line-chart" className="text-white text-lg" />
             </div>
-            <span className="font-display font-extrabold text-lg tracking-tight text-[#1E3A5F]">CLOSING LINE</span>
+            <span className="font-display font-extrabold text-xl text-[#1E3A5F]">Sharpe</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
-            {link('/', 'Matches')}
+            {link('/matches', 'Matches', '/match')}
             {link('/portfolio', 'Portfolio')}
             {link('/leaderboard', 'Leaderboard')}
           </nav>

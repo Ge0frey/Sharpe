@@ -31,7 +31,7 @@ export default function MatchDetail() {
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 reveal">
         <div>
           <nav className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-            <Link to="/" className="hover:text-[#1E3A5F] transition-colors">Matches</Link>
+            <Link to="/matches" className="hover:text-[#1E3A5F] transition-colors">Matches</Link>
             <Icon icon="lucide:chevron-right" />
             <span className="text-[#1E3A5F] font-num normal-case tracking-normal">{fixture.Competition} · #{fixtureId}</span>
           </nav>

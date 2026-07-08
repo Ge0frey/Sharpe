@@ -1,4 +1,4 @@
-# CLOSING LINE — Architecture & Implementation Spec
+# Sharpe — Architecture & Implementation Spec
 
 > **Product:** A provably-fair "beat the closing line" skill game. A user makes a World Cup call at a locked timestamp; the app proves on-chain (a) what the TxODDS consensus line was at entry, (b) what it was at close, and (c) the actual match result. **Closing Line Value (CLV)** — the pro metric for betting skill — becomes a trustless, on-chain score.
 >

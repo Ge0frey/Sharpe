@@ -1,5 +1,5 @@
 /**
- * M0 PROOF SPIKE — the gate for CLOSING LINE.
+ * M0 PROOF SPIKE — the gate for Sharpe.
  *
  * Proves, end-to-end on devnet, that we can:
  *   1. onboard the free World Cup tier (guest JWT -> subscribe(1,4) -> activate)

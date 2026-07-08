@@ -1,6 +1,8 @@
-# CLOSING LINE
+# Sharpe
 
-A provably fair "beat the market" skill game for the 2026 World Cup, built on TxLINE and Solana.
+A provably fair "beat the closing line" skill game for the 2026 World Cup, built on TxLINE and Solana.
+
+The name is a double play: a **sharp** is the pro bettor who beats the closing line, and the **Sharpe ratio** is finance's benchmark for real, risk-adjusted skill — exactly what Sharpe proves for every call, on-chain, as Closing Line Value.
 
 You make a call on a World Cup match before it settles. Your skill is measured as Closing Line Value (CLV): how far the consensus betting line moved in your favor between the moment you locked it and the moment it closed. Every input to that score, the entry line, the closing line, and the final result, is a cryptographic Merkle proof verified on Solana through TxLINE. There is no oracle to trust and no admin who can change an outcome.
 
@@ -38,13 +40,13 @@ Sharp bettors do not measure themselves by whether a single bet won. They measur
 
 The problem, until now, is that "the line" was never provable. You had to trust a screenshot or a book's word for what the price was.
 
-TxLINE changes that. It publishes consensus odds and match scores to Solana and lets anyone reconstruct a Merkle proof that a specific odds record or score statistic was part of the committed data set. CLOSING LINE turns that into a game: lock a market at the opening line, and the platform proves, on-chain, what the opening line was, what the closing line was, and how the match actually ended. Your CLV becomes a trustless, on-chain number, and a leaderboard ranks players by it.
+TxLINE changes that. It publishes consensus odds and match scores to Solana and lets anyone reconstruct a Merkle proof that a specific odds record or score statistic was part of the committed data set. Sharpe turns that into a game: lock a market at the opening line, and the platform proves, on-chain, what the opening line was, what the closing line was, and how the match actually ended. Your CLV becomes a trustless, on-chain number, and a leaderboard ranks players by it.
 
 ## Why Closing Line Value
 
 Most sports applications in this space resolve simple win or lose bets by proving the score. That is valuable, but it only uses one of TxLINE's verifiers, `validate_stat`.
 
-CLOSING LINE is built on the primitive almost nobody uses: `validate_odds`. This verifier proves what the consensus line was at a given timestamp. Proving the odds, not just the result, is what makes CLV possible and trustless. It is the difference between "we resolved a bet" and "we can prove the market itself, then prove you beat it."
+Sharpe is built on the primitive almost nobody uses: `validate_odds`. This verifier proves what the consensus line was at a given timestamp. Proving the odds, not just the result, is what makes CLV possible and trustless. It is the difference between "we resolved a bet" and "we can prove the market itself, then prove you beat it."
 
 Because the game scores skill through CLV rather than a wager, it needs no staking pools, which keeps it fully aligned with the track rule that the internal TxL token is never used for peer to peer transfers. Predictions live entirely on our own Solana program.
 
@@ -90,7 +92,7 @@ Every user-facing part of the application, described.
 
 ### Navigation and wallet
 
-A persistent top bar carries the CLOSING LINE wordmark and links to Matches, Portfolio, and Leaderboard, plus the wallet connect button on the right. The wallet button is provided by the Solana wallet-adapter and is themed to match the app. Connection state is shared across the app through a single provider, so any page can read the connected wallet and build transactions.
+A persistent top bar carries the Sharpe wordmark and links to Matches, Portfolio, and Leaderboard, plus the wallet connect button on the right. The wallet button is provided by the Solana wallet-adapter and is themed to match the app. Connection state is shared across the app through a single provider, so any page can read the connected wallet and build transactions.
 
 ### Matches board
 
@@ -228,7 +230,7 @@ On-chain, the app and the program call the txoracle verifiers `validate_odds` an
 
 | Item | Value |
 |---|---|
-| CLOSING LINE program (devnet) | `734ZWmPmAMGSjCshLCJQRpPNiaWBQsdaZDkvP3MAGmLz` |
+| Sharpe program (devnet) | `734ZWmPmAMGSjCshLCJQRpPNiaWBQsdaZDkvP3MAGmLz` |
 | TxLINE txoracle program (devnet) | `6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J` |
 | TxLINE API host (devnet) | `https://txline-dev.txodds.com` |
 | Demo fixture, USA 2 to 0 Bosnia and Herzegovina | `18172379` |

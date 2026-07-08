@@ -1,24 +1,30 @@
+import type { ReactNode } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Nav from './components/Nav'
 import Icon from './components/Icon'
+import Landing from './pages/Landing'
 import Matches from './pages/Matches'
 import MatchDetail from './pages/MatchDetail'
 import Portfolio from './pages/Portfolio'
 import Leaderboard from './pages/Leaderboard'
 
+/** Constrained column for the in-app screens. The landing is full-bleed and opts out. */
+function Shell({ children }: { children: ReactNode }) {
+  return <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">{children}</main>
+}
+
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Nav />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
-        <Routes>
-          <Route path="/" element={<Matches />} />
-          <Route path="/match/:id" element={<MatchDetail />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/matches" element={<Shell><Matches /></Shell>} />
+        <Route path="/match/:id" element={<Shell><MatchDetail /></Shell>} />
+        <Route path="/portfolio" element={<Shell><Portfolio /></Shell>} />
+        <Route path="/leaderboard" element={<Shell><Leaderboard /></Shell>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <footer className="bg-white border-t border-slate-100 py-8">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">

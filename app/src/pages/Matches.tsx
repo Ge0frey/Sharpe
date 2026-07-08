@@ -4,7 +4,6 @@ import { txline } from '../lib/txline'
 import { CFG, DEMO_FIXTURE_META } from '../config'
 import { Card, Badge } from '../components/ui'
 import Icon from '../components/Icon'
-import { LineMotif, ProofTicker } from '../components/graphics'
 
 function fmt(ts: number) { return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
@@ -53,47 +52,19 @@ export default function Matches() {
   let n = 0
   return (
     <div>
-      {/* Hero */}
-      <section className="relative mb-14 md:mb-20">
-        <div className="grid lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7 reveal">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white shadow-sm text-[11px] font-bold text-slate-500 mb-7">
-              <span className="w-2 h-2 rounded-full bg-[#FF6B35] animate-pulse"></span>
-              <span className="font-num tracking-wide">TxLINE DEVNET · 2026 WORLD CUP</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-display font-extrabold leading-[1.02] text-[#1E3A5F] mb-6">
-              Beat the<br />closing line.
-            </h1>
-            <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
-              Call a World Cup market before kickoff. Your skill is scored as <span className="text-[#FF6B35] font-bold">Closing Line Value</span> —
-              how far the consensus line moved your way — with entry, close, and result each
-              <span className="text-[#1E3A5F] font-bold"> proven on Solana</span> via TxLINE Merkle proofs.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-6">
-              <a href="#provable" className="inline-flex items-center gap-2 accent-gradient btn-shine glow-accent text-white font-bold px-7 py-3.5 rounded-xl transition-transform hover:-translate-y-0.5">
-                Pick a match <Icon icon="lucide:arrow-right" />
-              </a>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Icon icon="lucide:lock" className="text-[#1E3A5F]" /> No stake. Pure skill.
-              </div>
-            </div>
-          </div>
-          <div className="lg:col-span-5 reveal" style={{ animationDelay: '120ms' }}>
-            <Card className="p-6 elev-lg overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.18em]">Consensus line · demo</span>
-                <span className="font-num text-xs text-[#FF6B35] font-bold">CLV +4.2%</span>
-              </div>
-              <LineMotif className="w-full h-40" />
-              <div className="flex justify-between mt-3 font-num text-[10px] font-bold text-slate-400 tracking-tight">
-                <span>ENTRY</span><span>PRE-MATCH</span><span>CLOSE</span>
-              </div>
-            </Card>
-          </div>
+      {/* Header */}
+      <section className="mb-12 md:mb-16 reveal">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white shadow-sm text-[11px] font-bold text-slate-500 mb-6">
+          <span className="w-2 h-2 rounded-full bg-[#FF6B35] animate-pulse"></span>
+          <span className="font-num tracking-wide">TxLINE DEVNET · 2026 WORLD CUP</span>
         </div>
-        <div className="mt-10">
-          <ProofTicker />
-        </div>
+        <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.05]">
+          Pick a match.
+        </h1>
+        <p className="mt-4 text-lg text-slate-600 leading-relaxed max-w-2xl">
+          Matches tagged <span className="font-bold text-[#FF6B35]">Provable</span> have full devnet data — open one to
+          lock the opening line and settle your Closing Line Value on-chain.
+        </p>
       </section>
 
       {error && (
