@@ -1,15 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { useClv } from '../state/useClv'
 import { listPredictions } from '../chain/actions'
-import { CLV } from '../components/ui'
+import { CLV, Badge } from '../components/ui'
 import Icon from '../components/Icon'
+import { RowSkeleton } from '../components/Skeleton'
 
 const short = (s: string) => s.slice(0, 4) + '…' + s.slice(-4)
 const avatar = (k: string) => `https://api.dicebear.com/7.x/identicon/svg?seed=${k}`
 const medal = ['bg-amber-100 text-amber-700', 'bg-slate-100 text-slate-600', 'bg-orange-100 text-orange-800']
 
 export default function Leaderboard() {
-  const { clv } = useClv()
+  const { clv, wallet, connected } = useClv()
+  const me = connected ? wallet!.publicKey.toBase58() : null
   const { data: preds = [], isLoading } = useQuery({ queryKey: ['predictions'], queryFn: () => listPredictions(clv) })
 
   const byUser = new Map<string, { cum: number; n: number; closed: number; settled: number; wins: number }>()
@@ -50,7 +52,7 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      {isLoading && <p className="text-slate-400">Loading…</p>}
+      {isLoading && <div className="space-y-2.5" aria-busy="true">{[0, 1, 2, 3, 4].map((i) => <RowSkeleton key={i} />)}</div>}
       {!isLoading && rows.length === 0 && (
         <div className="soft-card rounded-2xl p-12 text-center">
           <Icon icon="lucide:trophy" className="text-4xl text-slate-300" />
@@ -64,14 +66,15 @@ export default function Leaderboard() {
           {order.map((idx) => {
             const r = podium[idx]
             const first = idx === 0
+            const isMe = r.k === me
             return (
               <div key={r.k}
-                className={`reveal rounded-2xl p-5 text-center ${first ? 'soft-card elev-lg -mt-4 ring-2 ring-[#FF6B35]/20' : 'soft-card'}`}
+                className={`reveal rounded-2xl p-5 text-center ${isMe ? 'soft-card ring-2 ring-[#FF6B35]' : first ? 'soft-card elev-lg -mt-4 ring-2 ring-[#FF6B35]/20' : 'soft-card'}`}
                 style={{ animationDelay: `${idx * 90}ms` }}>
                 <div className={`mx-auto w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold ${medal[idx]}`}>{idx + 1}</div>
                 <img src={avatar(r.k)} alt="" className={`mx-auto mt-3 rounded-full bg-slate-100 border-2 border-white shadow-sm ${first ? 'w-16 h-16' : 'w-12 h-12'}`} />
                 {first && <Icon icon="lucide:crown" className="text-[#FF6B35] text-xl mt-2" />}
-                <div className="font-num font-bold text-sm text-[#1E3A5F] mt-2">{short(r.k)}</div>
+                <div className="font-num font-bold text-sm text-[#1E3A5F] mt-2 inline-flex items-center gap-1.5">{short(r.k)}{isMe && <Badge tone="amber">You</Badge>}</div>
                 <div className={`font-display font-extrabold mt-1 ${first ? 'text-2xl' : 'text-xl'}`}>
                   {r.closed ? <CLV bps={r.cum} /> : <span className="text-slate-300">—</span>}
                 </div>
@@ -93,14 +96,17 @@ export default function Leaderboard() {
             <div className="col-span-2 text-right">CLV</div>
           </div>
           <div className="flex flex-col gap-2.5">
-            {rows.map((r, i) => (
-              <div key={r.k} className="soft-card row-hover rounded-2xl px-5 py-4 grid grid-cols-12 items-center reveal" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+            {rows.map((r, i) => {
+              const isMe = r.k === me
+              return (
+              <div key={r.k} className={`soft-card row-hover rounded-2xl px-5 py-4 grid grid-cols-12 items-center reveal ${isMe ? 'ring-2 ring-[#FF6B35]' : ''}`} style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
                 <div className="col-span-2 md:col-span-1">
                   <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm ${i < 3 ? medal[i] : 'text-slate-400'}`}>{i + 1}</span>
                 </div>
                 <div className="col-span-6 md:col-span-4 flex items-center gap-3">
                   <img src={avatar(r.k)} alt="" className="w-9 h-9 rounded-full bg-slate-100 border-2 border-white shadow-sm" />
                   <span className="font-num font-bold text-sm text-[#1E3A5F]">{short(r.k)}</span>
+                  {isMe && <Badge tone="amber">You</Badge>}
                 </div>
                 <div className="hidden md:block md:col-span-4 pr-6">
                   <div className="relative h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
@@ -113,7 +119,7 @@ export default function Leaderboard() {
                   {r.closed ? <CLV bps={r.cum} /> : <span className="text-slate-300">—</span>}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       )}

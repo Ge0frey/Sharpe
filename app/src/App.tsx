@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
+import ScrollToTop from './components/ScrollToTop'
 import Landing from './pages/Landing'
 import Matches from './pages/Matches'
 import MatchDetail from './pages/MatchDetail'
@@ -16,6 +17,7 @@ function Shell({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       <Nav />
       <Routes>
         <Route path="/" element={<Landing />} />

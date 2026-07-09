@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Icon from './Icon'
 import { CFG } from '../config'
+import { explorerAddr } from '../lib/explorer'
 
 function trunc(s: string) {
   return s.length > 12 ? `${s.slice(0, 4)}…${s.slice(-4)}` : s
@@ -16,7 +17,7 @@ const ringDark =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C1B30] rounded'
 
 export default function Footer() {
-  const explorer = `https://explorer.solana.com/address/${CFG.clvProgram}?cluster=devnet`
+  const explorer = explorerAddr(CFG.clvProgram)
   return (
     <footer className="relative overflow-hidden bg-[#0C1B30] text-white">
       <div className="h-[3px] accent-gradient" />
