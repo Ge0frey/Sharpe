@@ -6,6 +6,7 @@ import { oddsTrajectory, finalResult } from '../lib/domain'
 import { Card } from '../components/ui'
 import Icon from '../components/Icon'
 import Flag from '../components/Flag'
+import { Skeleton } from '../components/Skeleton'
 import OddsChart from '../components/OddsChart'
 import Ticket from '../components/Ticket'
 
@@ -13,7 +14,7 @@ export default function MatchDetail() {
   const { id } = useParams()
   const fixtureId = Number(id)
 
-  const { data: fixtures = [] } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
+  const { data: fixtures = [], isLoading: fixturesLoading } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
   const fixture = fixtures.find((f: any) => f.FixtureId === fixtureId) ?? DEMO_FIXTURE_META.find((f) => f.FixtureId === fixtureId)
 
   const start = fixture ? Number(fixture.StartTime) : 0
@@ -24,7 +25,24 @@ export default function MatchDetail() {
     queryKey: ['result', fixtureId], enabled: !!fixture, retry: 0, queryFn: () => finalResult(fixtureId),
   })
 
-  if (!fixture) return <p className="text-slate-400">Loading match…</p>
+  if (!fixture) {
+    if (fixturesLoading) return (
+      <div className="space-y-6">
+        <Skeleton className="h-12 w-2/3 rounded-xl" />
+        <Skeleton className="h-72 w-full rounded-xl" />
+      </div>
+    )
+    return (
+      <Card className="p-12 text-center max-w-lg mx-auto">
+        <Icon icon="lucide:search-x" className="text-4xl text-slate-300" />
+        <h1 className="text-2xl font-display font-extrabold text-[#1E3A5F] mt-3">Match not found</h1>
+        <p className="text-slate-500 mt-2">Fixture #{fixtureId} isn't in this dataset.</p>
+        <Link to="/matches" className="mt-5 inline-flex items-center gap-1.5 font-bold text-[#FF6B35] hover:underline">
+          <Icon icon="lucide:arrow-left" className="text-sm" aria-hidden /> Back to matches
+        </Link>
+      </Card>
+    )
+  }
 
   return (
     <div>
@@ -81,9 +99,15 @@ export default function MatchDetail() {
               </div>
             </div>
             <div className="text-xs text-slate-400 mb-4">TxLINE StablePrice 1X2, de-margined. This is the line you're proving against.</div>
-            {trajLoading
-              ? <div className="h-72 grid place-items-center text-slate-400 text-sm">Building trajectory…</div>
-              : <OddsChart data={traj} />}
+            {trajLoading ? (
+              <Skeleton className="h-72 w-full rounded-xl" />
+            ) : traj.length === 0 ? (
+              <div className="h-72 grid place-items-center text-center text-slate-400 text-sm">
+                No pre-match odds available for this fixture yet.
+              </div>
+            ) : (
+              <OddsChart data={traj} />
+            )}
           </Card>
 
           {/* Proof story / timeline */}
