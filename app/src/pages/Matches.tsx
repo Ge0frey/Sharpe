@@ -5,6 +5,7 @@ import { CFG, DEMO_FIXTURE_META } from '../config'
 import { Card, Badge } from '../components/ui'
 import Icon from '../components/Icon'
 import Flag from '../components/Flag'
+import { FixtureCardSkeleton } from '../components/Skeleton'
 
 function fmt(ts: number) { return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
@@ -76,8 +77,6 @@ export default function Matches() {
           <Icon icon="lucide:triangle-alert" /> Couldn't reach TxLINE ({String((error as any).message)}). Check the data token in .env.local.
         </div>
       )}
-      {isLoading && <p className="text-slate-400">Loading fixtures…</p>}
-
       <div className="space-y-16" id="provable">
         {withData.length > 0 && (
           <Section index={++n} title="Provable now" badge="Data live" caption="Finished matches with full devnet data">
@@ -93,6 +92,14 @@ export default function Matches() {
           <Section index={++n} title="Other finished">
             {finished.map((f: any, i: number) => <FixtureCard key={f.FixtureId} f={f} i={i} />)}
           </Section>
+        )}
+        {isLoading && (
+          <section aria-busy="true">
+            <div className="line-divider mb-6" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => <FixtureCardSkeleton key={i} />)}
+            </div>
+          </section>
         )}
       </div>
     </div>
