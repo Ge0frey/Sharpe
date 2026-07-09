@@ -22,8 +22,8 @@ export function Button({ children, onClick, disabled, variant = 'primary', class
     outline: 'bg-white border border-slate-200 text-[#1E3A5F] hover:border-[#FF6B35]/50 hover:text-[#FF6B35]',
   }[variant]
   return (
-    <button onClick={onClick} disabled={disabled}
-      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 active:scale-[.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:translate-y-0 ${styles} ${className}`}>
+    <button type="button" onClick={onClick} disabled={disabled}
+      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-[transform,background-color,box-shadow,color,border-color] duration-150 ease-out active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:translate-y-0 ${styles} ${className}`}>
       {children}
     </button>
   )
