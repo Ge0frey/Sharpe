@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useClv } from '../state/useClv'
 import { txline } from '../lib/txline'
@@ -14,6 +15,24 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
   const { txo } = useClv()
   const fixtureId = Number(pred.fixtureId)
   const market = MARKETS[pred.selection]
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const trigger = document.activeElement as HTMLElement | null
+    closeRef.current?.focus()
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { onClose(); return }
+      if (e.key !== 'Tab') return
+      const nodes = panelRef.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])')
+      if (!nodes || nodes.length === 0) return
+      const first = nodes[0], last = nodes[nodes.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('keydown', onKey); trigger?.focus?.() }
+  }, [onClose])
 
   const entry = useQuery({
     queryKey: ['verify-entry', pred.pubkey], retry: 0, queryFn: async () => {
@@ -59,7 +78,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E3A5F]/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden elev-lg animate-pop" onClick={(e: any) => e.stopPropagation()}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label="Verifiable receipt" className="bg-white rounded-3xl w-full max-w-lg overflow-hidden elev-lg animate-pop" onClick={(e: any) => e.stopPropagation()}>
         {/* Header */}
         <div className="accent-gradient px-6 py-5 text-white relative">
           <div className="flex items-center justify-between">
@@ -67,7 +86,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
               <Icon icon="lucide:shield-check" className="text-2xl" />
               <h2 className="font-display font-extrabold text-xl">Verifiable receipt</h2>
             </div>
-            <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
+            <button ref={closeRef} type="button" onClick={onClose} aria-label="Close" className="text-white/80 hover:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
               <Icon icon="lucide:x" className="text-2xl" />
             </button>
           </div>
