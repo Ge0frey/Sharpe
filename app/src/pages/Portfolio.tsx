@@ -11,13 +11,18 @@ import Icon from '../components/Icon'
 import Flag from '../components/Flag'
 import { CountUp } from '../components/motion'
 import { Sparkline, Meter } from '../components/graphics'
+import { RowSkeleton } from '../components/Skeleton'
 import VerifyModal from '../components/VerifyModal'
+import { explorerAddr, explorerTx } from '../lib/explorer'
+import { isUserRejection } from '../lib/wallet'
+import { useToast } from '../state/toast'
 
 const MARKET_LABEL = ['Home win', 'Draw', 'Away win']
 const statusKey = (s: any) => Object.keys(s ?? {})[0] ?? 'unknown'
 
 export default function Portfolio() {
   const { clv, wallet, connected } = useClv()
+  const toast = useToast()
   const qc = useQueryClient()
   const [busy, setBusy] = useState<string | null>(null)
   const [verify, setVerify] = useState<{ pred: any; fixture: any } | null>(null)
@@ -48,16 +53,18 @@ export default function Portfolio() {
       const start = Number(fx.StartTime)
       const closeRec = (await pickOdds(Number(p.fixtureId), start - 60_000)) ?? (await pickOdds(Number(p.fixtureId), start - 300_000)) ?? (await pickOdds(Number(p.fixtureId), start - 900_000))
       if (!closeRec) throw new Error('no closing line found')
-      await settleClose(clv, new PublicKey(p.pubkey), closeRec, p.selection)
+      const sig = await settleClose(clv, new PublicKey(p.pubkey), closeRec, p.selection)
+      toast.success('Closing line proven', { href: explorerTx(sig) })
       qc.invalidateQueries({ queryKey: ['predictions'] })
-    } catch (e: any) { setErr(e?.message ?? String(e)) } finally { setBusy(null) }
+    } catch (e: any) { if (!isUserRejection(e)) setErr(e?.message ?? String(e)) } finally { setBusy(null) }
   }
   async function doSettleOutcome(p: any) {
     setBusy(p.pubkey); setErr(null)
     try {
-      await settleOutcome(clv, new PublicKey(p.pubkey), Number(p.fixtureId))
+      const sig = await settleOutcome(clv, new PublicKey(p.pubkey), Number(p.fixtureId))
+      toast.success('Result settled on-chain', { href: explorerTx(sig) })
       qc.invalidateQueries({ queryKey: ['predictions'] })
-    } catch (e: any) { setErr(e?.message ?? String(e)) } finally { setBusy(null) }
+    } catch (e: any) { if (!isUserRejection(e)) setErr(e?.message ?? String(e)) } finally { setBusy(null) }
   }
 
   return (
@@ -111,7 +118,7 @@ export default function Portfolio() {
           <Icon icon="lucide:triangle-alert" className="mt-0.5 shrink-0" /> {err}
         </div>
       )}
-      {isLoading && <p className="text-slate-400">Loading…</p>}
+      {isLoading && <div className="space-y-3" aria-busy="true">{[0, 1, 2].map((i) => <RowSkeleton key={i} />)}</div>}
       {!isLoading && sorted.length === 0 && (
         <Card className="p-12 text-center">
           <Icon icon="lucide:inbox" className="text-4xl text-slate-300" />
@@ -139,6 +146,9 @@ export default function Portfolio() {
                     ) : `Fixture ${p.fixtureId}`}
                   </div>
                   <div className="text-xs text-slate-400 mt-0.5">Selection · <span className="text-[#FF6B35] font-semibold">{MARKET_LABEL[p.selection]}</span></div>
+                  <a href={explorerAddr(p.pubkey)} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-[#FF6B35] transition-colors">
+                    <Icon icon="lucide:external-link" className="text-[10px]" aria-hidden /> on-chain
+                  </a>
                 </div>
                 <Stat label="Entry" value={`${(p.entryProbBps / 100).toFixed(2)}%`} />
                 <Stat label="Close" value={p.closeProbBps ? `${(p.closeProbBps / 100).toFixed(2)}%` : '—'} />
