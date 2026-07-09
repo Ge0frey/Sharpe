@@ -4,11 +4,17 @@ import { Link } from 'react-router-dom'
 import { useClv } from '../state/useClv'
 import { MARKETS, pickOdds, probPct, decimal } from '../lib/domain'
 import { openPrediction } from '../chain/actions'
+import { explorerTx } from '../lib/explorer'
+import { isUserRejection, useSolBalance } from '../lib/wallet'
+import { useToast } from '../state/toast'
 import { Button, Card } from './ui'
 import Icon from './Icon'
+import { Skeleton } from './Skeleton'
 
 export default function Ticket({ fixture }: { fixture: any }) {
-  const { clv, connected } = useClv()
+  const { clv, connected, wallet } = useClv()
+  const balance = useSolBalance(wallet?.publicKey)
+  const toast = useToast()
   const qc = useQueryClient()
   const start = Number(fixture.StartTime)
   const fixtureId = fixture.FixtureId
@@ -31,9 +37,10 @@ export default function Ticket({ fixture }: { fixture: any }) {
     try {
       const r = await openPrediction(clv, fixtureId, market, entryRec)
       setDone({ sig: r.sig })
+      toast.success('Entry line proven on-chain', { href: explorerTx(r.sig) })
       qc.invalidateQueries({ queryKey: ['predictions'] })
     } catch (e: any) {
-      setErr(e?.message ?? String(e))
+      if (!isUserRejection(e)) setErr(e?.message ?? String(e))
     } finally { setBusy(false) }
   }
 
@@ -45,6 +52,9 @@ export default function Ticket({ fixture }: { fixture: any }) {
       <div className="text-lg font-display font-extrabold text-[#1E3A5F] mb-1">Entry line proven on-chain</div>
       <p className="text-sm text-slate-500 leading-relaxed mb-5">Your opening line is locked and cryptographically verified. Track your CLV in the portfolio.</p>
       <Link to="/portfolio"><Button className="w-full">Go to Portfolio →</Button></Link>
+      <a href={explorerTx(done.sig)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6B35] hover:underline">
+        View transaction <Icon icon="lucide:external-link" className="text-[10px]" aria-hidden />
+      </a>
     </Card>
   )
 
@@ -61,7 +71,14 @@ export default function Ticket({ fixture }: { fixture: any }) {
       </div>
 
       <div className="p-6">
-        {isLoading && <p className="text-slate-400 text-sm">Loading opening line…</p>}
+        {isLoading && (
+          <div className="space-y-5" aria-busy="true">
+            <Skeleton className="h-3 w-24" />
+            <div className="grid grid-cols-3 gap-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
+            <Skeleton className="h-24 rounded-xl" />
+            <Skeleton className="h-12 rounded-xl" />
+          </div>
+        )}
         {entryRec && (
           <>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Select your call</label>
@@ -70,8 +87,8 @@ export default function Ticket({ fixture }: { fixture: any }) {
                 const price = entryRec.Prices[m.priceIndex]
                 const active = sel === m.key
                 return (
-                  <button key={m.key} onClick={() => setSel(m.key)}
-                    className={`rounded-xl p-3 text-center transition-all duration-300 ${
+                  <button key={m.key} type="button" aria-pressed={active} onClick={() => setSel(m.key)}
+                    className={`rounded-xl p-3 text-center transition-[transform,background-color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A5F] focus-visible:ring-offset-2 ${
                       active
                         ? 'bg-[#FF6B35]/10 ring-2 ring-[#FF6B35] text-[#1E3A5F] -translate-y-0.5 shadow-sm'
                         : 'bg-[#F8F7F5] hover:bg-slate-100 text-[#1E3A5F]'
@@ -92,13 +109,25 @@ export default function Ticket({ fixture }: { fixture: any }) {
               </div>
             </div>
 
-            {connected
-              ? <Button onClick={submit} disabled={busy} className="w-full py-4 text-base">
+            {connected ? (
+              <>
+                {balance !== null && balance < 0.002 && (
+                  <div className="mb-3 text-xs bg-amber-50 text-amber-700 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                    <Icon icon="lucide:fuel" className="mt-0.5 shrink-0" aria-hidden />
+                    <span>This wallet has no devnet SOL for rent + fees.{' '}
+                      <a href="https://faucet.solana.com" target="_blank" rel="noreferrer" className="font-bold underline">Get devnet SOL ↗</a>
+                    </span>
+                  </div>
+                )}
+                <Button onClick={submit} disabled={busy || (balance !== null && balance < 0.002)} className="w-full py-4 text-base">
                   {busy
                     ? <span className="inline-flex items-center gap-2"><Icon icon="lucide:loader-circle" className="animate-spin" /> Proving entry on-chain…</span>
                     : <span className="inline-flex items-center gap-2">Lock {market.label} & prove entry <Icon icon="lucide:arrow-right" /></span>}
                 </Button>
-              : <div className="text-sm text-slate-500 text-center py-3 bg-[#F8F7F5] rounded-xl">Connect a devnet wallet to lock a call.</div>}
+              </>
+            ) : (
+              <div className="text-sm text-slate-500 text-center py-3 bg-[#F8F7F5] rounded-xl">Connect a devnet wallet to lock a call.</div>
+            )}
 
             {err && <p className="text-red-500 text-xs mt-3 break-words">{err}</p>}
           </>
