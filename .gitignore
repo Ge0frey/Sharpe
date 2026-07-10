@@ -8,7 +8,4 @@ test-ledger
 .surfpool
 
 # Local credentials — never commit.
-# .state.json holds a guest JWT + TxLINE api token; .taker.json is a raw keypair.
-scripts/.state.json
-scripts/.taker.json
-scripts/*.json.bak
+*.json.bak
