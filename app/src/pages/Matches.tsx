@@ -1,7 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { txline } from '../lib/txline'
-import { CFG, DEMO_FIXTURE_META } from '../config'
+import { DEMO_FIXTURE_META } from '../config'
+import { useFixtures, useProvenFixtureIds, type FixtureMeta } from '../state/fixtures'
 import { Card, Badge } from '../components/ui'
 import Icon from '../components/Icon'
 import Flag from '../components/Flag'
@@ -9,8 +8,7 @@ import { FixtureCardSkeleton } from '../components/Skeleton'
 
 function fmt(ts: number) { return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
-function FixtureCard({ f, i }: { f: any; i: number }) {
-  const hasData = CFG.demoFixtures.includes(f.FixtureId)
+function FixtureCard({ f, i, hasData = false }: { f: any; i: number; hasData?: boolean }) {
   const finished = Number(f.StartTime) < Date.now()
   return (
     <Link to={`/match/${f.FixtureId}`} className="block group">
@@ -51,11 +49,26 @@ function FixtureCard({ f, i }: { f: any; i: number }) {
 }
 
 export default function Matches() {
-  const { data: fixtures = [], isLoading, error } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
+  // The program is the index of provable matches. Any fixture with a proven kickoff
+  // stays browsable forever, long after `/fixtures/snapshot` has dropped it.
+  const provenIds = useProvenFixtureIds()
+  const { byId, rows, isLoading, error } = useFixtures(provenIds)
   const now = Date.now()
-  const withData = DEMO_FIXTURE_META
-  const finished = fixtures.filter((f: any) => Number(f.StartTime) < now && !CFG.demoFixtures.includes(f.FixtureId)).sort((a: any, b: any) => Number(b.StartTime) - Number(a.StartTime))
-  const upcoming = fixtures.filter((f: any) => Number(f.StartTime) >= now).sort((a: any, b: any) => Number(a.StartTime) - Number(b.StartTime))
+
+  // A match is "provable now" if it has finished AND its kickoff is proven on-chain
+  // (or it is one of the hardcoded demo fixtures).
+  const provableIds = new Set<number>([...provenIds, ...DEMO_FIXTURE_META.map((f) => f.FixtureId)])
+  const withData = [...provableIds]
+    .map((id) => byId.get(id))
+    .filter((f): f is FixtureMeta => !!f && Number(f.StartTime) < now)
+    .sort((a, b) => Number(b.StartTime) - Number(a.StartTime))
+
+  const upcoming = rows
+    .filter((f: any) => Number(f.StartTime) >= now)
+    .sort((a: any, b: any) => Number(a.StartTime) - Number(b.StartTime))
+  const finished = rows
+    .filter((f: any) => Number(f.StartTime) < now && !provableIds.has(Number(f.FixtureId)))
+    .sort((a: any, b: any) => Number(b.StartTime) - Number(a.StartTime))
 
   let n = 0
   return (
@@ -67,8 +80,8 @@ export default function Matches() {
           Pick a match.
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed max-w-2xl">
-          Matches tagged <span className="font-bold text-[#FF6B35]">Provable</span> have full devnet data — open one to
-          lock the opening line and settle your Closing Line Value on-chain.
+          Matches tagged <span className="font-bold text-[#FF6B35]">Provable</span> have a kickoff proven on-chain. Open one
+          to commit to a line and settle your Closing Line Value against Merkle proofs.
         </p>
       </section>
 
@@ -79,13 +92,15 @@ export default function Matches() {
       )}
       <div className="space-y-16" id="provable">
         {withData.length > 0 && (
-          <Section index={++n} title="Provable now" badge="Data live" caption="Finished matches with full devnet data">
-            {withData.map((f: any, i: number) => <FixtureCard key={f.FixtureId} f={f} i={i} />)}
+          <Section index={++n} title="Provable now" badge="Data live" caption="Finished matches with a kickoff proven on-chain">
+            {withData.map((f: any, i: number) => <FixtureCard key={f.FixtureId} f={f} i={i} hasData />)}
           </Section>
         )}
         {upcoming.length > 0 && (
           <Section index={++n} title="Upcoming">
-            {upcoming.map((f: any, i: number) => <FixtureCard key={f.FixtureId} f={f} i={i} />)}
+            {upcoming.map((f: any, i: number) => (
+              <FixtureCard key={f.FixtureId} f={f} i={i} hasData={provableIds.has(Number(f.FixtureId))} />
+            ))}
           </Section>
         )}
         {finished.length > 0 && (

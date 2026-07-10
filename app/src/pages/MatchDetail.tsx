@@ -1,8 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { txline } from '../lib/txline'
-import { DEMO_FIXTURE_META } from '../config'
 import { oddsTrajectory, finalResult, probPct, isFinalised } from '../lib/domain'
+import { useFixtures } from '../state/fixtures'
 import { useFixtureFeed } from '../state/feed'
 import { Card } from '../components/ui'
 import Icon from '../components/Icon'
@@ -15,8 +14,10 @@ export default function MatchDetail() {
   const { id } = useParams()
   const fixtureId = Number(id)
 
-  const { data: fixtures = [], isLoading: fixturesLoading } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
-  const fixture = fixtures.find((f: any) => f.FixtureId === fixtureId) ?? DEMO_FIXTURE_META.find((f) => f.FixtureId === fixtureId)
+  // Resolves from the snapshot, the demo set, or `/fixtures/validation` for a match
+  // the snapshot has already dropped. Without this, every finished fixture 404s here.
+  const { byId, isLoading: fixturesLoading } = useFixtures([fixtureId])
+  const fixture = byId.get(fixtureId)
 
   const start = fixture ? Number(fixture.StartTime) : 0
   const { data: traj = [], isLoading: trajLoading } = useQuery({

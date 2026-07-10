@@ -3,8 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PublicKey } from '@solana/web3.js'
 import { useClv } from '../state/useClv'
 import { listPredictions, proveEntry, settleClose, settleOutcome, voidPrediction, provenKickoff } from '../chain/actions'
-import { txline } from '../lib/txline'
-import { DEMO_FIXTURE_META } from '../config'
+import { useFixtures } from '../state/fixtures'
 import { marketFromAccount, pickOddsFor } from '../lib/domain'
 import { Card, Button, Badge, CLV } from '../components/ui'
 import Icon from '../components/Icon'
@@ -36,8 +35,9 @@ export default function Portfolio() {
   const [err, setErr] = useState<string | null>(null)
 
   const { data: preds = [], isLoading } = useQuery({ queryKey: ['predictions'], queryFn: () => listPredictions(clv) })
-  const { data: fixtures = [] } = useQuery({ queryKey: ['fixtures'], queryFn: txline.fixtures })
-  const fixtureOf = (id: number) => fixtures.find((f: any) => f.FixtureId === id) ?? DEMO_FIXTURE_META.find((f) => f.FixtureId === id)
+  // Predictions outlive the fixtures snapshot, so resolve their matches by id.
+  const { byId } = useFixtures(preds.map((p: any) => Number(p.fixtureId)))
+  const fixtureOf = (id: number) => byId.get(id)
 
   const mine = connected ? preds.filter((p: any) => p.predictor.toBase58() === wallet!.publicKey.toBase58()) : preds
   const sorted = [...mine].sort((a: any, b: any) => Number(b.createdAt) - Number(a.createdAt))

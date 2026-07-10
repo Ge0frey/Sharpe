@@ -120,7 +120,7 @@ export async function voidPrediction(program: Program, pred: PublicKey) {
  * pre-v2 `Prediction` accounts that share the discriminator but not the layout, so
  * decode defensively and skip what we cannot read.
  */
-async function listAccounts(program: Program, kind: "prediction" | "duel") {
+async function listAccounts(program: Program, kind: "prediction" | "duel" | "fixtureFacts") {
   const raw = await program.provider.connection.getProgramAccounts(program.programId);
   const out: any[] = [];
   for (const a of raw) {
@@ -129,6 +129,13 @@ async function listAccounts(program: Program, kind: "prediction" | "duel") {
   return out;
 }
 export const listPredictions = (program: Program) => listAccounts(program, "prediction");
+
+/**
+ * Every fixture anyone has ever bet on carries a `FixtureFacts` account with its
+ * proven kickoff, so the program is a permanent index of provable matches. The
+ * `/fixtures/snapshot` window is not: it drops a fixture the moment it finishes.
+ */
+export const listProvenFixtures = (program: Program) => listAccounts(program, "fixtureFacts");
 export const listDuels = (program: Program) => listAccounts(program, "duel");
 
 // ── prop duels ───────────────────────────────────────────────────────────────
