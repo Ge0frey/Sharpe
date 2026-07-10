@@ -45,6 +45,21 @@ export async function ensureFixtureProven(program: Program, fixtureId: number): 
 }
 
 /**
+ * The Merkle-proven kickoff, read from `FixtureFacts`. `/fixtures/snapshot` is
+ * forward-looking and drops a fixture the moment it finishes, so it cannot be the
+ * source of a kickoff we still need after full time. This is also the exact number
+ * the program anchors its timing guards to.
+ */
+export async function provenKickoff(program: Program, fixtureId: number): Promise<number> {
+  const info = await program.provider.connection.getAccountInfo(fixturePda(program.programId, fixtureId));
+  if (!info) throw new Error(`fixture ${fixtureId} has no proven kickoff on-chain`);
+  // Anchor camelCases the IDL when it builds `program.coder`, so the account is
+  // keyed "fixtureFacts", not "FixtureFacts". The latter throws "Account not found".
+  const facts: any = program.coder.accounts.decode("fixtureFacts", info.data);
+  return Number(facts.startTime);
+}
+
+/**
  * open_prediction: the commitment. No CPI — the odds root covering the quote just
  * taken is not published until the next 5-minute batch, so proving here would make
  * it impossible to bet on a match that has not started.

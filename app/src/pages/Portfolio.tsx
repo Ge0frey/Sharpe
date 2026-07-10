@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { PublicKey } from '@solana/web3.js'
 import { useClv } from '../state/useClv'
-import { listPredictions, proveEntry, settleClose, settleOutcome, voidPrediction } from '../chain/actions'
+import { listPredictions, proveEntry, settleClose, settleOutcome, voidPrediction, provenKickoff } from '../chain/actions'
 import { txline } from '../lib/txline'
 import { DEMO_FIXTURE_META } from '../config'
 import { marketFromAccount, pickOddsFor } from '../lib/domain'
@@ -72,8 +72,7 @@ export default function Portfolio() {
   async function doSettleClose(p: any) {
     setBusy(p.pubkey); setErr(null)
     try {
-      const fx = fixtureOf(Number(p.fixtureId))
-      const start = Number(fx.StartTime)
+      const start = await provenKickoff(clv, Number(p.fixtureId))
       const m = marketOf(p)
       // The closing line is the last quote before the whistle; the program refuses
       // anything timestamped after the proven kickoff or flagged in-play.

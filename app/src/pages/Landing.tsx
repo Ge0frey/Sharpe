@@ -223,7 +223,7 @@ export default function Landing() {
           <Reveal className="max-w-2xl">
             <Eyebrow>How it works</Eyebrow>
             <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
-              Three proofs, <span className="text-electric">one score</span>.
+              Four proofs, <span className="text-electric">one score</span>.
             </h2>
             <p className="mt-5 text-lg text-slate-600 leading-relaxed">
               Every step that touches your CLV is gated by a TxLINE verifier running on-chain. Nothing advances on trust.
@@ -261,9 +261,10 @@ export default function Landing() {
                 No oracle.<br />No admin.<br /><span className="text-electric">Just proofs.</span>
               </h2>
               <p className="mt-6 text-white/70 leading-relaxed">
-                The moat is <span className="font-num font-bold text-[#FF8A5E]">validate_odds</span> — proving the consensus
-                <span className="font-semibold text-white"> odds</span> themselves, not just the score. Almost nobody does this.
-                It's what makes the line, and your edge, trustless.
+                Everyone can prove a <span className="font-semibold text-white">score</span>. Sharpe also proves the consensus
+                <span className="font-semibold text-white"> odds</span> with <span className="font-num font-bold text-[#FF8A5E]">validate_odds</span>,
+                and anchors both to a kickoff proven by <span className="font-num font-bold text-[#FF8A5E]">validate_fixture</span>.
+                Without that anchor, an authentic line quoted after the whistle would score as pure edge.
               </p>
             </Reveal>
 
@@ -332,9 +333,11 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="mt-8 grid grid-cols-3 gap-3">
-                  <Stat label="Entry (Home)" value={<CountStat to={72.09} format={(n) => `${n.toFixed(2)}%`} />} />
+                  {/* The values the chain stores: entry_prob_bps 7210, close_prob_bps 7163,
+                      clv_bps -47. `prob_bps` rounds, so 10_000_000/1387 is 7210, not 7209. */}
+                  <Stat label="Entry (Home)" value={<CountStat to={72.10} format={(n) => `${n.toFixed(2)}%`} />} />
                   <Stat label="Close" value={<CountStat to={71.63} format={(n) => `${n.toFixed(2)}%`} />} />
-                  <Stat label="CLV" value={<CountStat to={-0.46} format={(n) => `${n.toFixed(2)}%`} />} negative />
+                  <Stat label="CLV" value={<CountStat to={-0.47} format={(n) => `${n.toFixed(2)}%`} />} negative />
                 </div>
               </div>
               <div className="flex items-center gap-2 px-6 py-4 bg-[#F8F7F5] border-t border-slate-100 text-xs text-slate-500">
@@ -355,7 +358,7 @@ export default function Landing() {
             <div className="pitch-grid absolute inset-0 opacity-25" aria-hidden />
             <h2 className="relative text-4xl md:text-6xl font-display font-extrabold leading-[1.05]">Make your call.</h2>
             <p className="relative mt-5 text-lg text-white/90 max-w-xl mx-auto leading-relaxed">
-              Open a fixture, lock the opening line, and let the proofs settle the rest.
+              Open a fixture, commit to a line, and settle it against proofs anyone can check.
             </p>
             <div className="relative mt-9 flex justify-center">
               <Link
@@ -409,14 +412,19 @@ const MARQUEE = ['BEAT THE CLOSE', 'PROVEN ON SOLANA', 'CLOSING LINE VALUE', 'NO
 
 const STEPS = [
   {
-    title: 'Lock the opening line',
+    title: 'Prove the kickoff',
+    primitive: 'validate_fixture',
+    body: 'Before anything else, the match\'s kickoff time is proven on-chain and written once. Every rule that follows is anchored to it. A proof tells you an odds record is authentic; only a proven kickoff tells you it was quoted before the match.',
+  },
+  {
+    title: 'Commit your call',
     primitive: 'validate_odds',
-    body: 'Pick Home, Draw, or Away. Sharpe fetches the Merkle proof for the opening odds and proves it on-chain before storing your entry probability — so the price you locked is authentic, not a screenshot.',
+    body: 'Pick a side. Sharpe pins the quote you took by its timestamp and message hash. The odds root for that quote publishes on the next 5-minute batch, so the proof lands moments later — it cannot be faked, and only the exact quote you took satisfies it.',
   },
   {
     title: 'The market closes',
     primitive: 'validate_odds',
-    body: 'At kickoff the last pre-match line is proven the same way. Your CLV is computed on-chain as close minus entry — a pure function of two proven numbers.',
+    body: 'Once the match starts, the last pre-match line is proven the same way. Your CLV is computed on-chain as close minus entry, a pure function of two proven numbers.',
   },
   {
     title: 'The final whistle',
@@ -426,7 +434,8 @@ const STEPS = [
 ]
 
 const PROOFS = [
-  { label: 'Entry line', primitive: 'validate_odds', desc: 'the opening consensus price' },
+  { label: 'The kickoff', primitive: 'validate_fixture', desc: 'what makes the other three mean anything' },
+  { label: 'Entry line', primitive: 'validate_odds', desc: 'the price you took, pinned by message hash' },
   { label: 'Closing line', primitive: 'validate_odds', desc: 'the final pre-match price' },
   { label: 'Match result', primitive: 'validate_stat', desc: 'the on-chain final score' },
 ]
