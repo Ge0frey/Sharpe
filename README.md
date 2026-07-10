@@ -1,6 +1,6 @@
 # Sharpe
 
-A "beat the closing line" skill game for the 2026 World Cup, built on TxLINE and Solana.
+Prove you can beat a betting market. Or find out that you can't. Built on TxLINE and Solana, for the 2026 World Cup.
 
 **Live:** https://sharpe-dusky.vercel.app (Solana devnet)
 

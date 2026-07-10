@@ -105,9 +105,9 @@ export default function Landing() {
                 <span className="text-electric">beat the market.</span>
               </h1>
               <p className="mt-7 text-lg md:text-xl text-white/60 leading-relaxed max-w-xl">
-                Sharpe turns <span className="font-bold text-white">Closing Line Value</span> — the pro measure of betting edge —
-                into a trustless, on-chain score. Call a World Cup market and your entry, the close, and the result are each
-                proven on Solana.
+                Call a World Cup match before kickoff. Sharpe scores you on <span className="font-bold text-white">Closing Line Value</span>,
+                the gap between the price you took and the price the market closed at. Your entry, the close, and the result
+                are each proven on Solana.
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-4">
                 <CtaPrimary to="/matches">Enter Sharpe</CtaPrimary>
