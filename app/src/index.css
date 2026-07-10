@@ -22,16 +22,20 @@ body {
   font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
   background-color: var(--cream);
-  /* Page-wide blueprint grid (navy on light). Fixed origin so dark-section
-     overlays can share it seamlessly. Shows through every transparent section. */
+  /* Page-wide blueprint grid (navy on light). Shows through every transparent section. */
   background-image:
     radial-gradient(60% 45% at 12% 4%, rgba(255, 107, 53, 0.07), transparent 70%),
     radial-gradient(50% 40% at 92% 0%, rgba(30, 58, 95, 0.06), transparent 70%),
     linear-gradient(rgba(30, 58, 95, 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(30, 58, 95, 0.07) 1px, transparent 1px);
   background-size: auto, auto, 46px 46px, 46px 46px;
-  /* glows stay put; the grid scrolls with the page (renders everywhere, iOS-safe) */
-  background-attachment: fixed, fixed, scroll, scroll;
+  /* Every layer is viewport-anchored, including the grid. A `scroll` grid is
+     painted from the document top while each dark section's `.grid-overlay` is
+     painted from its own top, so the two only ever line up when a section
+     happens to start on a 46px boundary. Anchoring both to the viewport makes
+     one continuous grid down the whole page. iOS Safari ignores `fixed` and
+     falls back to `scroll`, which is exactly the old behaviour. */
+  background-attachment: fixed, fixed, fixed, fixed;
 }
 
 .font-display { font-family: 'Archivo', 'Satoshi', sans-serif; letter-spacing: -0.02em; }
@@ -144,12 +148,16 @@ body {
 /* White blueprint grid for dark sections. Same 46px cell + left origin as the
    page grid, so the vertical lines stay colinear across every section boundary
    — the grid reads continuous, only its colour flips light↔navy. */
+/* The white grid painted over dark sections. Viewport-anchored to match the
+   navy grid on <body>, so the lines continue unbroken across the boundary
+   between a light section and a dark one. */
 .grid-overlay {
   position: absolute; inset: 0; pointer-events: none;
   background-image:
     linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 46px 46px;
+  background-attachment: fixed;
 }
 
 /* Solid accent for highlighted words (previously an animated gradient) */

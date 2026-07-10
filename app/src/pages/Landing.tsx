@@ -5,13 +5,17 @@ import Icon from '../components/Icon'
 import Flag from '../components/Flag'
 import { LineMotif, ProofTicker } from '../components/graphics'
 import { CountUp, Reveal, useInView } from '../components/motion'
+import { Card, Badge } from '../components/ui'
+import { useAuth } from '../state/auth'
 import { CFG } from '../config'
 
 /* ── Shared building blocks ────────────────────────────────────────────── */
 
+// slate-500 is 4.44:1 on the #F8F7F5 plane, under the 4.5:1 AA floor for 11px text.
+// slate-600 clears it on both white (7.6:1) and the tint (7.1:1).
 function Eyebrow({ children, tone = 'light' }: { children: ReactNode; tone?: 'light' | 'dark' }) {
   return (
-    <span className={`block text-[11px] font-bold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-white/60' : 'text-slate-500'}`}>
+    <span className={`block text-[11px] font-bold uppercase tracking-[0.18em] ${tone === 'dark' ? 'text-white/60' : 'text-slate-600'}`}>
       {children}
     </span>
   )
@@ -81,6 +85,10 @@ function Confetti() {
 
 export default function Landing() {
   const [heroClv, setHeroClv] = useState(0)
+  // `/matches` sits behind DataGate. Sending a visitor with no credentials there
+  // lands them on a wall, so cold traffic goes to onboarding instead.
+  const { ready } = useAuth()
+  const entry = ready ? '/matches' : '/onboard'
   useEffect(() => {
     const t = setTimeout(() => setHeroClv(4.2), 550)
     return () => clearTimeout(t)
@@ -110,7 +118,7 @@ export default function Landing() {
                 are each proven on Solana.
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-4">
-                <CtaPrimary to="/matches">Enter Sharpe</CtaPrimary>
+                <CtaPrimary to={entry}>Enter Sharpe</CtaPrimary>
                 <a
                   href="#how"
                   className="inline-flex items-center gap-2 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl transition-colors duration-200 hover:border-[#FF6B35] hover:text-[#FF8A5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C1B30]"
@@ -118,10 +126,12 @@ export default function Landing() {
                   See how it works
                 </a>
               </div>
+              {/* "No stake" was true of the ranked surface only. Prop duels escrow real
+                  devnet USDT, so the hero cannot claim it of the whole product. */}
               <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/55">
-                <span className="inline-flex items-center gap-2"><Icon icon="lucide:lock" aria-hidden /> No stake</span>
+                <span className="inline-flex items-center gap-2"><Icon icon="lucide:ticket" aria-hidden /> Free to enter</span>
                 <span className="inline-flex items-center gap-2"><Icon icon="lucide:shield-check" className="text-emerald-400" aria-hidden /> No oracle</span>
-                <span className="inline-flex items-center gap-2"><Icon icon="lucide:zap" className="text-[#FFA83D]" aria-hidden /> Pure skill</span>
+                <span className="inline-flex items-center gap-2"><Icon icon="lucide:key-round" className="text-[#FFA83D]" aria-hidden /> No admin key</span>
               </div>
             </div>
 
@@ -132,9 +142,11 @@ export default function Landing() {
                   <Flag name="United States" className="text-sm" />USA 2–0 BIH · <span className="text-emerald-400">WON</span>
                 </span>
               </div>
+              {/* The real ranked call on devnet: committed pre-kickoff, closed +15 bps.
+                  Its counterpart above won with negative CLV. Both are on-chain. */}
               <div className="bob-2 absolute -bottom-4 -right-1 sm:-right-3 z-20 rounded-xl bg-white/10 ring-1 ring-white/15 backdrop-blur px-3 py-2 shadow-lg">
                 <span className="inline-flex items-center gap-1.5 font-num text-xs font-bold text-white">
-                  <Flag name="Spain" className="text-sm" />ESP · entry <span className="text-[#FF8A5E]">72%</span>
+                  <Flag name="France" className="text-sm" />FRA · CLV <span className="text-emerald-400">+0.15%</span>
                 </span>
               </div>
               <div className="relative rounded-2xl p-6 bg-white/[0.06] ring-1 ring-white/10 backdrop-blur overflow-hidden">
@@ -217,34 +229,106 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How it works: three proofs ───────────────────────────────────── */}
-      <section id="how" className="px-4 md:px-8 py-20 md:py-28 scroll-mt-24">
-        <div className="max-w-6xl mx-auto">
+      {/* ══ How it works: the four proofs (navy) ════════════════════════ */}
+      <section id="how" className="relative overflow-hidden bg-[#0F2138] text-white px-4 md:px-8 py-20 md:py-28 scroll-mt-24">
+        <div className="glow-blob float-a" style={{ top: '-24%', left: '-8%', width: '40%', height: '88%', background: 'radial-gradient(circle, rgba(255,107,53,0.34), transparent 68%)' }} aria-hidden />
+        <div className="grid-overlay" aria-hidden />
+        <div className="relative max-w-6xl mx-auto">
           <Reveal className="max-w-2xl">
-            <Eyebrow>How it works</Eyebrow>
-            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
+            <Eyebrow tone="dark">How it works</Eyebrow>
+            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold leading-[1.08]">
               Four proofs, <span className="text-electric">one score</span>.
             </h2>
-            <p className="mt-5 text-lg text-slate-600 leading-relaxed">
+            <p className="mt-5 text-lg text-white/70 leading-relaxed">
               Every step that touches your CLV is gated by a TxLINE verifier running on-chain. Nothing advances on trust.
             </p>
           </Reveal>
 
           <Reveal className="mt-12">
-            <ol className="relative ml-3 space-y-10 border-l-2 border-slate-200/80">
+            <ol className="relative ml-3 space-y-10 border-l-2 border-white/15">
               {STEPS.map((s, i) => (
                 <li key={s.title} className="relative pl-8 md:pl-10">
                   <span className="absolute -left-[15px] top-0 flex h-7 w-7 items-center justify-center rounded-full accent-gradient-2 font-num text-xs font-extrabold text-white shadow-[0_6px_16px_-4px_rgba(255,107,53,0.6)]">
                     {i + 1}
                   </span>
                   <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-xl md:text-2xl font-display font-extrabold text-[#1E3A5F]">{s.title}</h3>
-                    <Primitive name={s.primitive} />
+                    <h3 className="text-xl md:text-2xl font-display font-extrabold">{s.title}</h3>
+                    <Primitive name={s.primitive} tone="dark" />
                   </div>
-                  <p className="mt-2 text-slate-600 leading-relaxed max-w-2xl">{s.body}</p>
+                  <p className="mt-2 text-white/70 leading-relaxed max-w-2xl">{s.body}</p>
                 </li>
               ))}
             </ol>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── Two surfaces: ranked CLV, and the escrowed duels ─────────────── */}
+      <section className="px-4 md:px-8 py-20 md:py-28">
+        <div className="max-w-6xl mx-auto">
+          <Reveal className="max-w-2xl">
+            <Eyebrow>Two surfaces</Eyebrow>
+            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
+              One proof engine, <span className="text-electric">two ways to play</span>.
+            </h2>
+            <p className="mt-5 text-lg text-slate-600 leading-relaxed">
+              Corners and cards have no consensus line, so they can't carry CLV. That's exactly why they belong on
+              their own surface, where a provable stat is all you need.
+            </p>
+          </Reveal>
+
+          <div className="mt-12 grid md:grid-cols-2 gap-6">
+            {SURFACES.map((s, i) => (
+              <Reveal key={s.title} delay={i * 90}>
+                <Card className="p-7 md:p-8 h-full flex flex-col">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-2xl font-display font-extrabold text-[#1E3A5F]">{s.title}</h3>
+                    <Badge tone={s.tone}>{s.tag}</Badge>
+                  </div>
+                  <p className="mt-3 text-slate-600 leading-relaxed">{s.lede}</p>
+
+                  <div className="mt-6">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Markets</div>
+                    <ul className="mt-2 space-y-1.5">
+                      {s.markets.map((m) => (
+                        <li key={m} className="flex items-center gap-2 text-sm text-slate-600">
+                          <Icon icon="lucide:check" className="text-[#FF6B35] text-sm shrink-0" aria-hidden />
+                          {m}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">Proofs</div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {s.proofs.map((p) => <Primitive key={p} name={p} />)}
+                    </div>
+                  </div>
+
+                  <p className="mt-6 pt-5 border-t border-slate-100 text-sm font-semibold text-[#1E3A5F]">
+                    {s.payoff}
+                  </p>
+                </Card>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Integrity: the reason a backtest can never score. */}
+          <Reveal delay={180} className="mt-6">
+            <div className="rounded-2xl bg-[#1E3A5F] text-white px-6 py-7 md:px-8 md:py-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <Icon icon="lucide:gavel" className="text-2xl text-[#FF8A5E]" aria-hidden />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-display font-extrabold text-xl">Bet a match that already finished. Go ahead.</h3>
+                <p className="mt-1.5 text-white/60 leading-relaxed">
+                  Nothing stops you. Something stops it counting. The program compares the clock to a kickoff it proved
+                  against a Merkle root, and marks the call a <span className="font-bold text-white">Backtest</span> for good.
+                  It settles exactly the same way, and it never reaches the leaderboard. That rule holds for us too.
+                </p>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -358,11 +442,12 @@ export default function Landing() {
             <div className="pitch-grid absolute inset-0 opacity-25" aria-hidden />
             <h2 className="relative text-4xl md:text-6xl font-display font-extrabold leading-[1.05]">Make your call.</h2>
             <p className="relative mt-5 text-lg text-white/90 max-w-xl mx-auto leading-relaxed">
-              Open a fixture, commit to a line, and settle it against proofs anyone can check.
+              Connect a devnet wallet, provision the free World Cup tier in one click, and commit to a line before
+              kickoff. Everything after that settles against proofs anyone can check.
             </p>
             <div className="relative mt-9 flex justify-center">
               <Link
-                to="/matches"
+                to={entry}
                 className="group inline-flex items-center gap-2 bg-white text-[#1E3A5F] font-extrabold px-8 py-4 rounded-xl shadow-lg transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#FF6B35]"
               >
                 Enter Sharpe
@@ -408,7 +493,28 @@ function trunc(s: string) {
   return s.length > 12 ? `${s.slice(0, 6)}…${s.slice(-6)}` : s
 }
 
-const MARQUEE = ['BEAT THE CLOSE', 'PROVEN ON SOLANA', 'CLOSING LINE VALUE', 'NO ORACLE']
+const MARQUEE = ['BEAT THE CLOSE', 'PROVEN ON SOLANA', 'CLOSING LINE VALUE', 'NO ADMIN KEY', 'NO ORACLE']
+
+const SURFACES = [
+  {
+    title: 'Ranked CLV',
+    tag: 'No stake',
+    tone: 'muted' as const,
+    lede: 'Call a priced market before kickoff. Your entry price, the closing price, and the result are each proven, and the gap between the first two is your score.',
+    markets: ['Match result, 1X2', 'Total goals, over/under', 'First-half result'],
+    proofs: ['validate_fixture', 'validate_odds', 'validate_stat'],
+    payoff: 'Scores on the leaderboard. Nothing to stake, nothing to lose.',
+  },
+  {
+    title: 'Prop duels',
+    tag: 'USDT escrow',
+    tone: 'accent' as const,
+    lede: 'No bookmaker prices "both teams’ corners over ten and a half". There is no closing line to beat, but there is still a fact the chain can prove. Offer a side and someone takes the other.',
+    markets: ['Combined corners', 'Combined cards', 'First-half corners', 'Team and match totals'],
+    proofs: ['validate_fixture', 'validate_stat'],
+    payoff: 'Winner takes both stakes. No rake, and no admin key on the vault.',
+  },
+]
 
 const STEPS = [
   {
