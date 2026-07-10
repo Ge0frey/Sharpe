@@ -24,14 +24,14 @@ function FixtureCard({ f, i, hasData = false }: { f: any; i: number; hasData?: b
         <div className="space-y-1 mb-6">
           <div className="flex items-center gap-2.5">
             <Flag name={f.Participant1} className="text-2xl" />
-            <span className="text-2xl font-display font-extrabold text-[#1E3A5F] leading-tight">{f.Participant1}</span>
+            <span className="text-2xl font-display font-extrabold text-ink leading-tight">{f.Participant1}</span>
           </div>
           <div className="flex items-center gap-2 text-slate-300 pl-0.5">
             <span className="h-px w-4 bg-slate-200" /><span className="text-[11px] font-bold uppercase tracking-widest">vs</span>
           </div>
           <div className="flex items-center gap-2.5">
             <Flag name={f.Participant2} className="text-2xl" />
-            <span className="text-2xl font-display font-extrabold text-[#1E3A5F] leading-tight">{f.Participant2}</span>
+            <span className="text-2xl font-display font-extrabold text-ink leading-tight">{f.Participant2}</span>
           </div>
         </div>
         <div className="flex items-end justify-between pt-4 border-t border-slate-100">
@@ -76,7 +76,7 @@ export default function Matches() {
       {/* Header */}
       <section className="mb-12 md:mb-16 reveal">
         <span className="block font-num text-[11px] font-bold tracking-wide text-slate-500 mb-6">TxLINE DEVNET · 2026 WORLD CUP</span>
-        <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.05]">
+        <h1 className="text-4xl md:text-5xl font-display font-extrabold text-ink leading-[1.05]">
           Pick a match.
         </h1>
         <p className="mt-4 text-lg text-slate-600 leading-relaxed max-w-2xl">
@@ -127,7 +127,7 @@ function Section({ index, title, badge, caption, children }: { index: number; ti
       <div className="flex items-end justify-between mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-4">
           <span className="font-num text-sm font-bold text-[#FF6B35]/60">{String(index).padStart(2, '0')}</span>
-          <h2 className="text-2xl md:text-3xl font-display font-extrabold text-[#1E3A5F]">{title}</h2>
+          <h2 className="text-2xl md:text-3xl font-display font-extrabold text-ink">{title}</h2>
           {badge && <Badge tone="accent">{badge}</Badge>}
         </div>
         {caption && <p className="text-sm text-slate-400">{caption}</p>}

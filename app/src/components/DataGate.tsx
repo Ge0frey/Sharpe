@@ -16,7 +16,7 @@ export default function DataGate({ children }: { children: React.ReactNode }) {
       <div className="w-14 h-14 rounded-2xl bg-[#FF6B35]/10 mx-auto flex items-center justify-center mb-4">
         <Icon icon="lucide:key-round" className="text-[#FF6B35] text-2xl" />
       </div>
-      <h2 className="text-xl font-display font-extrabold text-[#1E3A5F]">Data access needed</h2>
+      <h2 className="text-xl font-display font-extrabold text-ink">Data access needed</h2>
       <p className="text-sm text-slate-500 mt-2 leading-relaxed">
         Sharpe ships with no credentials. Provision TxLINE's free World Cup tier to your
         own wallet — it takes one click, costs nothing, and stays in your browser.

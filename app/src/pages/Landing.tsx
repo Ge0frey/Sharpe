@@ -36,7 +36,7 @@ function CtaPrimary({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Link
       to={to}
-      className="group inline-flex items-center gap-2 accent-gradient-2 btn-shine text-white font-extrabold px-7 py-3.5 rounded-xl transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C1B30]"
+      className="group inline-flex items-center gap-2 accent-gradient-2 btn-shine text-white font-extrabold px-7 py-3.5 rounded-xl transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
     >
       {children}
       <Icon icon="lucide:arrow-right" className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
@@ -62,7 +62,7 @@ function CountStat({ to, format, className }: { to: number; format: (n: number) 
 function Confetti() {
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.45 })
   const pieces = useMemo(() => {
-    const colors = ['#FF6B35', '#FFA83D', '#1E3A5F', '#10B981', '#F8F7F5']
+    const colors = ['#FF6B35', '#FFA83D', '#0F0F0F', '#10B981', '#F8F7F5']
     return Array.from({ length: 28 }, (_, i) => ({
       id: i,
       left: `${Math.round(Math.random() * 100)}%`,
@@ -96,12 +96,16 @@ export default function Landing() {
 
   return (
     <main className="flex-1">
-      {/* ══ Night-stadium hero ══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[#0C1B30] text-white">
-        {/* stadium-light glows */}
-        <div className="glow-blob float-a" style={{ top: '-14%', left: '-8%', width: '48%', height: '78%', background: 'radial-gradient(circle, rgba(255,107,53,0.55), transparent 62%)' }} aria-hidden />
-        <div className="glow-blob float-b" style={{ top: '-22%', right: '-10%', width: '46%', height: '80%', background: 'radial-gradient(circle, rgba(96,150,255,0.30), transparent 65%)' }} aria-hidden />
-        {/* white blueprint grid — continuous with the page-wide navy grid */}
+      {/* ══ Night-stadium hero ══════════════════════════════════════════
+           `id` is load-bearing: Nav measures this section's bottom edge to know
+           exactly when to stop wearing the hero's black. */}
+      <section id="hero" className="relative overflow-hidden bg-ink-950 text-white">
+        {/* Stadium-light glows, kept small and low-alpha. On black, a large or saturated
+            blob stops reading as light and turns the whole plane brown. The counter-light
+            is a neutral white throw rather than a competing hue. */}
+        <div className="glow-blob float-a" style={{ top: '-8%', left: '-4%', width: '30%', height: '46%', background: 'radial-gradient(circle, rgba(255,107,53,0.20), transparent 58%)' }} aria-hidden />
+        <div className="glow-blob float-b" style={{ top: '-12%', right: '-6%', width: '28%', height: '44%', background: 'radial-gradient(circle, rgba(255,255,255,0.05), transparent 60%)' }} aria-hidden />
+        {/* white blueprint grid, continuous with the page-wide grid on <body> */}
         <div className="grid-overlay" aria-hidden />
 
         <div className="relative max-w-6xl mx-auto px-4 md:px-8 pt-16 md:pt-20 pb-20 min-h-[86vh] flex items-center">
@@ -121,7 +125,7 @@ export default function Landing() {
                 <CtaPrimary to={entry}>Enter Sharpe</CtaPrimary>
                 <a
                   href="#how"
-                  className="inline-flex items-center gap-2 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl transition-colors duration-200 hover:border-[#FF6B35] hover:text-[#FF8A5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C1B30]"
+                  className="inline-flex items-center gap-2 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl transition-colors duration-200 hover:border-[#FF6B35] hover:text-[#FF8A5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   See how it works
                 </a>
@@ -166,6 +170,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
+
       </section>
 
       {/* ══ Kinetic broadcast marquee ═══════════════════════════════════ */}
@@ -175,7 +180,7 @@ export default function Landing() {
             <div key={k} className="flex items-center">
               {MARQUEE.map((w, i) => (
                 <span key={`${k}-${i}`} className="flex items-center">
-                  <span className={`font-display font-extrabold text-4xl md:text-6xl tracking-tight ${i % 2 ? 'text-outline' : 'text-[#1E3A5F]'}`}>{w}</span>
+                  <span className={`font-display font-extrabold text-4xl md:text-6xl tracking-tight ${i % 2 ? 'text-outline' : 'text-ink'}`}>{w}</span>
                   <span className="mx-6 md:mx-9 text-[#FF6B35] text-2xl md:text-4xl">●</span>
                 </span>
               ))}
@@ -189,12 +194,12 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           <Reveal className="lg:col-span-6">
             <Eyebrow>The metric</Eyebrow>
-            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
+            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-ink leading-[1.08]">
               The line was never <span className="text-electric">provable</span>.
             </h2>
             <p className="mt-6 text-lg text-slate-600 leading-relaxed">
               Sharp bettors don't measure themselves by whether a bet won — they measure themselves by the
-              <span className="font-bold text-[#1E3A5F]"> closing line</span>, the market's final and most efficient price.
+              <span className="font-bold text-ink"> closing line</span>, the market's final and most efficient price.
               Beat it consistently and you have an edge, even on bets that lose.
             </p>
             <p className="mt-4 text-lg text-slate-600 leading-relaxed">
@@ -206,10 +211,10 @@ export default function Landing() {
 
           <Reveal className="lg:col-span-6" delay={120}>
             <div className="soft-card lift rounded-2xl p-6 md:p-8 ring-inset">
-              <ProbBar label="Entry line" value={52.9} tone="navy" />
+              <ProbBar label="Entry line" value={52.9} tone="ink" />
               <div className="my-5 line-divider" />
               <ProbBar label="Closing line" value={55.1} tone="accent" />
-              <div className="mt-7 flex items-center justify-between rounded-xl bg-[#1E3A5F] px-4 py-3">
+              <div className="mt-7 flex items-center justify-between rounded-xl bg-ink-800 px-4 py-3">
                 <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Closing Line Value</span>
                 <span className="font-num text-lg font-extrabold text-[#FF8A5E]">+2.2%</span>
               </div>
@@ -222,18 +227,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Ticker of what gets proven (divides metric ↔ how-it-works) ───── */}
-      <section className="px-4 md:px-8">
-        <div className="max-w-6xl mx-auto">
-          <ProofTicker />
-        </div>
-      </section>
-
-      {/* ══ How it works: the four proofs (navy) ════════════════════════ */}
-      <section id="how" className="relative overflow-hidden bg-[#0F2138] text-white px-4 md:px-8 py-20 md:py-28 scroll-mt-24">
-        <div className="glow-blob float-a" style={{ top: '-24%', left: '-8%', width: '40%', height: '88%', background: 'radial-gradient(circle, rgba(255,107,53,0.34), transparent 68%)' }} aria-hidden />
+      {/* ══ How it works: the four proofs (dark plane) ══════════════════ */}
+      <section id="how" className="relative overflow-hidden bg-ink-900 text-white scroll-mt-24">
+        <div className="glow-blob float-a" style={{ top: '-18%', left: '-5%', width: '26%', height: '50%', background: 'radial-gradient(circle, rgba(255,107,53,0.16), transparent 60%)' }} aria-hidden />
         <div className="grid-overlay" aria-hidden />
-        <div className="relative max-w-6xl mx-auto">
+
+        <div className="relative max-w-6xl mx-auto px-4 md:px-8 py-20 md:py-28">
           <Reveal className="max-w-2xl">
             <Eyebrow tone="dark">How it works</Eyebrow>
             <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold leading-[1.08]">
@@ -261,6 +260,15 @@ export default function Landing() {
             </ol>
           </Reveal>
         </div>
+
+        {/* The receipts, closing the section that just explained them: the real settled
+            fixtures, and the verifiers those four steps named. Full-bleed, which is why
+            the padding lives on the content wrapper rather than the section. */}
+        <div className="relative border-t border-white/10 bg-white/[0.02]">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-3">
+            <ProofTicker dark />
+          </div>
+        </div>
       </section>
 
       {/* ── Two surfaces: ranked CLV, and the escrowed duels ─────────────── */}
@@ -268,7 +276,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <Reveal className="max-w-2xl">
             <Eyebrow>Two surfaces</Eyebrow>
-            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
+            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-ink leading-[1.08]">
               One proof engine, <span className="text-electric">two ways to play</span>.
             </h2>
             <p className="mt-5 text-lg text-slate-600 leading-relaxed">
@@ -282,7 +290,7 @@ export default function Landing() {
               <Reveal key={s.title} delay={i * 90}>
                 <Card className="p-7 md:p-8 h-full flex flex-col">
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-2xl font-display font-extrabold text-[#1E3A5F]">{s.title}</h3>
+                    <h3 className="text-2xl font-display font-extrabold text-ink">{s.title}</h3>
                     <Badge tone={s.tone}>{s.tag}</Badge>
                   </div>
                   <p className="mt-3 text-slate-600 leading-relaxed">{s.lede}</p>
@@ -306,7 +314,7 @@ export default function Landing() {
                     </div>
                   </div>
 
-                  <p className="mt-6 pt-5 border-t border-slate-100 text-sm font-semibold text-[#1E3A5F]">
+                  <p className="mt-6 pt-5 border-t border-slate-100 text-sm font-semibold text-ink">
                     {s.payoff}
                   </p>
                 </Card>
@@ -316,7 +324,7 @@ export default function Landing() {
 
           {/* Integrity: the reason a backtest can never score. */}
           <Reveal delay={180} className="mt-6">
-            <div className="rounded-2xl bg-[#1E3A5F] text-white px-6 py-7 md:px-8 md:py-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+            <div className="rounded-2xl bg-ink-800 text-white px-6 py-7 md:px-8 md:py-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
               <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                 <Icon icon="lucide:gavel" className="text-2xl text-[#FF8A5E]" aria-hidden />
               </div>
@@ -333,9 +341,9 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══ Trust band (deep-navy signature) ════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[#0F2138] text-white">
-        <div className="glow-blob float-b" style={{ top: '-30%', right: '-6%', width: '40%', height: '90%', background: 'radial-gradient(circle, rgba(255,107,53,0.4), transparent 68%)' }} aria-hidden />
+      {/* ══ Trust band (dark signature) ═════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-ink-900 text-white">
+        <div className="glow-blob float-b" style={{ top: '-20%', right: '-5%', width: '26%', height: '50%', background: 'radial-gradient(circle, rgba(255,107,53,0.16), transparent 60%)' }} aria-hidden />
         <div className="grid-overlay" aria-hidden />
         <div className="relative max-w-6xl mx-auto px-4 md:px-8 py-20 md:py-28">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -379,13 +387,13 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           <Reveal className="lg:col-span-5">
             <Eyebrow>Not a mockup</Eyebrow>
-            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-[#1E3A5F] leading-[1.08]">
+            <h2 className="mt-6 text-3xl md:text-5xl font-display font-extrabold text-ink leading-[1.08]">
               Real proofs, <span className="text-electric">from devnet</span>.
             </h2>
             <p className="mt-6 text-lg text-slate-600 leading-relaxed">
               This call settled end-to-end on Solana devnet through our program — entry and close proven with
-              <span className="font-num font-semibold text-[#1E3A5F]"> validate_odds</span>, the result with
-              <span className="font-num font-semibold text-[#1E3A5F]"> validate_stat</span>. The numbers are on-chain.
+              <span className="font-num font-semibold text-ink"> validate_odds</span>, the result with
+              <span className="font-num font-semibold text-ink"> validate_stat</span>. The numbers are on-chain.
             </p>
             <p className="mt-4 text-sm text-slate-500 leading-relaxed">
               Note it <span className="font-semibold text-slate-600">won</span> with slightly negative CLV — which is exactly why
@@ -406,13 +414,13 @@ export default function Landing() {
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                   <div className="flex flex-col items-center">
                     <Flag name="United States" className="text-3xl md:text-4xl" />
-                    <div className="mt-2 text-2xl md:text-3xl font-display font-extrabold text-[#1E3A5F]">USA</div>
+                    <div className="mt-2 text-2xl md:text-3xl font-display font-extrabold text-ink">USA</div>
                     <div className="mt-0.5 text-[10px] font-bold tracking-[0.2em] text-slate-400">HOME</div>
                   </div>
-                  <div className="font-num text-4xl md:text-5xl font-extrabold text-[#1E3A5F] tabular px-1">2&nbsp;–&nbsp;0</div>
+                  <div className="font-num text-4xl md:text-5xl font-extrabold text-ink tabular px-1">2&nbsp;–&nbsp;0</div>
                   <div className="flex flex-col items-center">
                     <Flag name="Bosnia & Herzegovina" className="text-3xl md:text-4xl" />
-                    <div className="mt-2 text-2xl md:text-3xl font-display font-extrabold text-[#1E3A5F]">BIH</div>
+                    <div className="mt-2 text-2xl md:text-3xl font-display font-extrabold text-ink">BIH</div>
                     <div className="mt-0.5 text-[10px] font-bold tracking-[0.2em] text-slate-400">AWAY</div>
                   </div>
                 </div>
@@ -448,7 +456,7 @@ export default function Landing() {
             <div className="relative mt-9 flex justify-center">
               <Link
                 to={entry}
-                className="group inline-flex items-center gap-2 bg-white text-[#1E3A5F] font-extrabold px-8 py-4 rounded-xl shadow-lg transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#FF6B35]"
+                className="group inline-flex items-center gap-2 bg-white text-ink font-extrabold px-8 py-4 rounded-xl shadow-lg transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#FF6B35]"
               >
                 Enter Sharpe
                 <Icon icon="lucide:arrow-right" className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
@@ -463,10 +471,10 @@ export default function Landing() {
 
 /* ── Section-local pieces + data ───────────────────────────────────────── */
 
-function ProbBar({ label, value, tone }: { label: string; value: number; tone: 'navy' | 'accent' }) {
+function ProbBar({ label, value, tone }: { label: string; value: number; tone: 'ink' | 'accent' }) {
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.4 })
-  const bar = tone === 'accent' ? 'bg-[#FF6B35]' : 'bg-[#1E3A5F]'
-  const text = tone === 'accent' ? 'text-[#FF6B35]' : 'text-[#1E3A5F]'
+  const bar = tone === 'accent' ? 'bg-[#FF6B35]' : 'bg-ink'
+  const text = tone === 'accent' ? 'text-[#FF6B35]' : 'text-ink'
   return (
     <div ref={ref}>
       <div className="flex items-baseline justify-between mb-2">
@@ -484,7 +492,7 @@ function Stat({ label, value, negative = false }: { label: string; value: ReactN
   return (
     <div className="rounded-xl bg-[#F8F7F5] px-3 py-3 text-center">
       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</div>
-      <div className={`mt-1 font-num text-lg font-extrabold tabular ${negative ? 'text-red-500' : 'text-[#1E3A5F]'}`}>{value}</div>
+      <div className={`mt-1 font-num text-lg font-extrabold tabular ${negative ? 'text-red-500' : 'text-ink'}`}>{value}</div>
     </div>
   )
 }
@@ -493,7 +501,17 @@ function trunc(s: string) {
   return s.length > 12 ? `${s.slice(0, 6)}…${s.slice(-6)}` : s
 }
 
-const MARQUEE = ['BEAT THE CLOSE', 'PROVEN ON SOLANA', 'CLOSING LINE VALUE', 'NO ADMIN KEY', 'NO ORACLE']
+// Must stay EVEN. The band styles by `i % 2`, and each repeat restarts at 0, so an
+// odd count collides two solids at every seam. Ordered so the alternation carries
+// meaning: solid says what Sharpe does, outline says what it hasn't got.
+const MARQUEE = [
+  'BEAT THE CLOSE',      // solid
+  'NO ORACLE',           // outline
+  'PROVEN ON SOLANA',    // solid
+  'NO ADMIN KEY',        // outline
+  'CLOSING LINE VALUE',  // solid
+  'MERKLE PROOFS',       // outline
+]
 
 const SURFACES = [
   {

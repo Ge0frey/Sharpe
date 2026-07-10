@@ -4,15 +4,15 @@ import Flag from './Flag'
 
 /**
  * The brand motif: a consensus line that draws itself, with an entry marker
- * (coral) and a closing marker (navy). Purely decorative — echoes the product.
+ * (coral) and a closing marker (ink). Purely decorative — echoes the product.
  */
 export function LineMotif({ className = '', dark = false }: { className?: string; dark?: boolean }) {
   // A single smooth path; length approximated for the draw animation.
   const d = 'M0,150 C60,140 110,168 170,120 S300,60 360,96 T520,44'
-  const line = dark ? '#FF7A45' : '#1E3A5F'
-  const fillTop = dark ? '#FF6B35' : '#1E3A5F'
+  const line = dark ? '#FF7A45' : '#0F0F0F'
+  const fillTop = dark ? '#FF6B35' : '#0F0F0F'
   const entryRef = dark ? '#FFFFFF' : '#FF6B35'
-  const closeMarker = dark ? '#FFFFFF' : '#1E3A5F'
+  const closeMarker = dark ? '#FFFFFF' : '#0F0F0F'
   const uid = dark ? 'lm-fill-d' : 'lm-fill'
   return (
     <svg viewBox="0 0 520 200" className={className} preserveAspectRatio="none" aria-hidden>
@@ -80,8 +80,12 @@ export function Meter({ bps, max = 500 }: { bps: number; max?: number }) {
   )
 }
 
-/** Scrolling proof ticker — real demo fixtures + the primitives that prove them. */
-export function ProofTicker() {
+/**
+ * Scrolling proof ticker: the real settled fixtures, and the primitives that prove
+ * them. Receipts, not decoration. `dark` dresses the chips as the hero's frosted
+ * badges so it can ride along the bottom of a black plane.
+ */
+export function ProofTicker({ dark = false }: { dark?: boolean }) {
   const items: any[] = [
     ...DEMO_FIXTURE_META.map((f: any) => ({ p1: f.Participant1, p2: f.Participant2, label: `${f.Participant1} vs ${f.Participant2}`, tag: 'entry · close · result proven' })),
     { label: 'validate_odds', tag: 'consensus line → on-chain' },
@@ -89,21 +93,27 @@ export function ProofTicker() {
     { label: 'Closing Line Value', tag: 'the pro measure of edge' },
   ]
   const row = [...items, ...items]
+  // The display accent is 2.8:1 on a light chip, under the 3:1 an icon needs.
+  const chip = dark ? 'bg-white/10 ring-1 ring-white/15 backdrop-blur' : 'bg-white/80 shadow-sm'
+  const label = dark ? 'text-white' : 'text-ink'
+  const tag = dark ? 'text-white/55' : 'text-slate-500'
+  const icon = dark ? 'text-accent' : 'text-accent-ink'
+  const flagRing = dark ? 'ring-white/25' : 'ring-white'
   return (
     <div className="marquee-mask overflow-hidden py-1">
       <div className="marquee-track gap-3">
         {row.map((it, i) => (
-          <span key={i} className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 shadow-sm text-sm">
+          <span key={i} className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ${chip}`}>
             {it.p1 ? (
               <span className="inline-flex items-center -space-x-1">
-                <Flag name={it.p1} className="text-base ring-1 ring-white rounded-full" />
-                <Flag name={it.p2} className="text-base ring-1 ring-white rounded-full" />
+                <Flag name={it.p1} className={`text-base ring-1 rounded-full ${flagRing}`} />
+                <Flag name={it.p2} className={`text-base ring-1 rounded-full ${flagRing}`} />
               </span>
             ) : (
-              <Icon icon="lucide:shield-check" className="text-[#FF6B35]" />
+              <Icon icon="lucide:shield-check" className={icon} aria-hidden />
             )}
-            <span className="font-bold text-[#1E3A5F]">{it.label}</span>
-            <span className="text-slate-400 text-xs">{it.tag}</span>
+            <span className={`font-bold ${label}`}>{it.label}</span>
+            <span className={`text-xs ${tag}`}>{it.tag}</span>
           </span>
         ))}
       </div>

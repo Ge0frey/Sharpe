@@ -86,7 +86,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
         <div className="min-w-0 flex items-start gap-3">
           <span className={`font-num text-xs font-bold mt-0.5 ${proven ? 'text-[#FF6B35]' : 'text-slate-300'}`}>{n}</span>
           <div className="min-w-0">
-            <div className="text-sm font-bold text-[#1E3A5F]">{title} <span className="font-num text-[10px] font-medium text-slate-400 lowercase">{sub}</span></div>
+            <div className="text-sm font-bold text-ink">{title} <span className="font-num text-[10px] font-medium text-slate-400 lowercase">{sub}</span></div>
             <div className="font-num text-xs text-slate-500 mt-1 break-all">
               {q.isError ? <span className="text-red-500">{String(q.error?.message)}</span> : q.data ? render?.(q.data) : 'reconstructing Merkle proof…'}
             </div>
@@ -98,7 +98,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E3A5F]/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm" onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label="Verifiable receipt" className="bg-white rounded-3xl w-full max-w-lg overflow-hidden elev-lg animate-pop" onClick={(e: any) => e.stopPropagation()}>
         {/* Header */}
         <div className="accent-gradient px-6 py-5 text-white relative">

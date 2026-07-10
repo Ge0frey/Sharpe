@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Sharpe</title>
+  <rect width="32" height="32" rx="7" fill="#0F0F0F"/>
+  <!-- Same geometry as src/components/LogoMark.tsx, translated into the 32px tile.
+       The mark is centred inside its own 24x24 box, so a flat translate(4 4) centres
+       it here too. Strokes are a touch heavier than the component's: at a 16px
+       favicon a 1.15 dashed line falls below half a pixel and disappears. -->
+  <g transform="translate(4 4)">
+    <!-- entry reference: the price you took -->
+    <line x1="2.2" y1="12.32" x2="21.4" y2="12.32" stroke="#FFFFFF" stroke-width="1.4" stroke-dasharray="2.6 2.6" opacity="0.5"/>
+    <!-- the consensus line: dip, overshoot, settle onto entry, then away to the close -->
+    <path d="M2.6 17.45 C4.67 16.5 6.42 19.16 8.49 14.6 S12.99 8.9 15.06 12.32 L20.6 7.38"
+          fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="15.06" cy="12.32" r="2.1" fill="#FF6B35"/>
+    <circle cx="20.6" cy="7.38" r="2.1" fill="#FFFFFF"/>
+  </g>
+</svg>

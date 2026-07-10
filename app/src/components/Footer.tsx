@@ -14,17 +14,17 @@ const EXPLORE = [
 ]
 
 const ringDark =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C1B30] rounded'
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded'
 
 export default function Footer() {
   const explorer = explorerAddr(CFG.clvProgram)
   return (
-    <footer className="relative overflow-hidden bg-[#0C1B30] text-white">
+    <footer className="relative overflow-hidden bg-ink-950 text-white">
       <div className="h-[3px] accent-gradient" />
       <div className="grid-overlay" aria-hidden />
       <div
         className="glow-blob float-b"
-        style={{ bottom: '-55%', left: '-6%', width: '40%', height: '150%', background: 'radial-gradient(circle, rgba(255,107,53,0.26), transparent 70%)' }}
+        style={{ bottom: '-40%', left: '-5%', width: '26%', height: '110%', background: 'radial-gradient(circle, rgba(255,107,53,0.14), transparent 62%)' }}
         aria-hidden
       />
 

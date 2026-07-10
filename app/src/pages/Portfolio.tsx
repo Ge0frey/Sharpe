@@ -109,12 +109,12 @@ export default function Portfolio() {
       <header className="mb-8 reveal">
         <div className="flex items-center gap-4 mb-3">
           <span className="font-num text-sm font-bold text-[#FF6B35]/60">01</span>
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#1E3A5F]">Your Portfolio</h1>
+          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-ink">Your Portfolio</h1>
         </div>
         <p className="text-lg text-slate-600 max-w-2xl">
           {connected
             ? <>Every settled call is scored by <span className="text-[#FF6B35] font-bold">Closing Line Value</span> — the definitive benchmark of betting skill.</>
-            : <>Connect a wallet to make and settle calls. Showing <span className="text-[#1E3A5F] font-bold">all predictions</span> on the program.</>}
+            : <>Connect a wallet to make and settle calls. Showing <span className="text-ink font-bold">all predictions</span> on the program.</>}
         </p>
       </header>
 
@@ -135,14 +135,14 @@ export default function Portfolio() {
         </Card>
         <Card className="p-5 reveal" style={{ animationDelay: '70ms' }}>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hit rate</div>
-          <div className="text-3xl font-display font-extrabold text-[#1E3A5F] mt-1 tabular">
+          <div className="text-3xl font-display font-extrabold text-ink mt-1 tabular">
             {settledCount ? <CountUp value={hitRate} format={(n) => `${Math.round(n)}%`} /> : <span className="text-slate-300">—</span>}
           </div>
           <div className="text-xs text-slate-400 mt-1">{settledCount} settled call{settledCount === 1 ? '' : 's'}</div>
         </Card>
         <Card className="p-5 reveal" style={{ animationDelay: '140ms' }}>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Open calls</div>
-          <div className="text-3xl font-display font-extrabold text-[#1E3A5F] mt-1 tabular">
+          <div className="text-3xl font-display font-extrabold text-ink mt-1 tabular">
             <CountUp value={mine.length} />
           </div>
           <div className="text-xs text-slate-400 mt-1">{closedCount} scored · {backtests} backtest</div>
@@ -172,7 +172,7 @@ export default function Portfolio() {
             <Card key={p.pubkey} className="p-5 reveal" style={{ animationDelay: `${i * 55}ms` }}>
               <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
                 <div className="min-w-[200px]">
-                  <div className="font-bold text-[#1E3A5F] flex items-center gap-2">
+                  <div className="font-bold text-ink flex items-center gap-2">
                     {fx ? (
                       <>
                         <Flag name={fx.Participant1} className="text-base" /> {fx.Participant1}
@@ -218,11 +218,11 @@ export default function Portfolio() {
 
       {/* Info */}
       <div className="mt-10 bg-white/70 ring-inset rounded-2xl p-6 flex gap-4 items-start">
-        <div className="w-10 h-10 rounded-xl bg-[#1E3A5F]/8 flex items-center justify-center shrink-0">
-          <Icon icon="lucide:info" className="text-lg text-[#1E3A5F]" />
+        <div className="w-10 h-10 rounded-xl bg-ink/8 flex items-center justify-center shrink-0">
+          <Icon icon="lucide:info" className="text-lg text-ink" />
         </div>
         <div>
-          <h3 className="font-bold text-[#1E3A5F] mb-1">How is CLV calculated?</h3>
+          <h3 className="font-bold text-ink mb-1">How is CLV calculated?</h3>
           <p className="text-sm text-slate-600 leading-relaxed">
             CLV = closing implied probability − entry implied probability, for the side you picked. A positive result means you secured a better price
             than the final market consensus before kickoff — the gold standard for identifying long-term skill over short-term luck.
@@ -242,7 +242,7 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{label}</div>
-      <div className="font-num text-sm font-semibold text-[#1E3A5F] mt-0.5">{value}</div>
+      <div className="font-num text-sm font-semibold text-ink mt-0.5">{value}</div>
     </div>
   )
 }

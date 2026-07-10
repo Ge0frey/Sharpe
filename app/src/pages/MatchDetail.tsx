@@ -43,7 +43,7 @@ export default function MatchDetail() {
     return (
       <Card className="p-12 text-center max-w-lg mx-auto">
         <Icon icon="lucide:search-x" className="text-4xl text-slate-300" />
-        <h1 className="text-2xl font-display font-extrabold text-[#1E3A5F] mt-3">Match not found</h1>
+        <h1 className="text-2xl font-display font-extrabold text-ink mt-3">Match not found</h1>
         <p className="text-slate-500 mt-2">Fixture #{fixtureId} isn't in this dataset.</p>
         <Link to="/matches" className="mt-5 inline-flex items-center gap-1.5 font-bold text-[#FF6B35] hover:underline">
           <Icon icon="lucide:arrow-left" className="text-sm" aria-hidden /> Back to matches
@@ -58,11 +58,11 @@ export default function MatchDetail() {
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 reveal">
         <div>
           <nav className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-            <Link to="/matches" className="hover:text-[#1E3A5F] transition-colors">Matches</Link>
+            <Link to="/matches" className="hover:text-ink transition-colors">Matches</Link>
             <Icon icon="lucide:chevron-right" />
-            <span className="text-[#1E3A5F] font-num normal-case tracking-normal">{fixture.Competition} · #{fixtureId}</span>
+            <span className="text-ink font-num normal-case tracking-normal">{fixture.Competition} · #{fixtureId}</span>
           </nav>
-          <h1 className="text-4xl md:text-6xl font-display font-extrabold text-[#1E3A5F] leading-[1.03]">
+          <h1 className="text-4xl md:text-6xl font-display font-extrabold text-ink leading-[1.03]">
             <span className="inline-flex items-center gap-3">
               <Flag name={fixture.Participant1} className="text-3xl md:text-5xl" />
               {fixture.Participant1}
@@ -80,7 +80,7 @@ export default function MatchDetail() {
             <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1 flex items-center gap-1.5 justify-end">
               <Icon icon="lucide:shield-check" /> Final · proven via validate_stat
             </div>
-            <div className="text-5xl font-display font-extrabold text-[#1E3A5F] tabular leading-none">
+            <div className="text-5xl font-display font-extrabold text-ink tabular leading-none">
               {result.p1}<span className="text-slate-300 mx-2">–</span>{result.p2}
             </div>
           </Card>
@@ -97,11 +97,11 @@ export default function MatchDetail() {
           <Card className="p-6 reveal" style={{ animationDelay: '80ms' }}>
             <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-lg bg-[#1E3A5F] text-white text-[11px] font-bold uppercase tracking-wide">Odds Trend</span>
+                <span className="px-3 py-1 rounded-lg bg-ink text-white text-[11px] font-bold uppercase tracking-wide">Odds Trend</span>
                 <span className="text-sm font-medium text-slate-500">Consensus implied probability — pre-match</span>
               </div>
               <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                <Legend swatch="#1E3A5F" label="Home" />
+                <Legend swatch="#0F0F0F" label="Home" />
                 <Legend swatch="#94a3b8" label="Draw" />
                 <Legend swatch="#FF6B35" label="Away" />
               </div>
@@ -117,9 +117,9 @@ export default function MatchDetail() {
               <span className="text-slate-500 font-num">{liveOdds.length} odds · {liveScores.length} score updates</span>
               {latest && (
                 <span className="text-slate-500 font-num">
-                  now <b className="text-[#1E3A5F]">{probPct(latest.Prices[0]).toFixed(1)}%</b> /
-                  <b className="text-[#1E3A5F]"> {probPct(latest.Prices[1]).toFixed(1)}%</b> /
-                  <b className="text-[#1E3A5F]"> {probPct(latest.Prices[2]).toFixed(1)}%</b>
+                  now <b className="text-ink">{probPct(latest.Prices[0]).toFixed(1)}%</b> /
+                  <b className="text-ink"> {probPct(latest.Prices[1]).toFixed(1)}%</b> /
+                  <b className="text-ink"> {probPct(latest.Prices[2]).toFixed(1)}%</b>
                 </span>
               )}
               {finalised && <span className="text-emerald-600 font-bold">full time</span>}
@@ -139,7 +139,7 @@ export default function MatchDetail() {
           <section className="reveal" style={{ animationDelay: '160ms' }}>
             <div className="flex items-center gap-4 mb-4">
               <span className="font-num text-sm font-bold text-[#FF6B35]/60">RX</span>
-              <h3 className="text-xl font-display font-extrabold text-[#1E3A5F]">How your CLV gets proven</h3>
+              <h3 className="text-xl font-display font-extrabold text-ink">How your CLV gets proven</h3>
               <div className="line-divider flex-1" />
             </div>
             <div className="grid md:grid-cols-3 gap-4">
@@ -172,7 +172,7 @@ function Step({ n, icon, title, body }: { n: string; icon: string; title: string
         </div>
         <span className="font-display font-extrabold text-2xl text-slate-200">{n}</span>
       </div>
-      <div className="font-bold text-[#1E3A5F] text-sm mb-1">{title}</div>
+      <div className="font-bold text-ink text-sm mb-1">{title}</div>
       <div className="text-xs text-slate-500 leading-relaxed">{body}</div>
     </Card>
   )

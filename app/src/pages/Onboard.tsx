@@ -48,7 +48,7 @@ export default function Onboard() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-display font-extrabold text-[#1E3A5F] mb-2">Get set up</h1>
+      <h1 className="text-3xl font-display font-extrabold text-ink mb-2">Get set up</h1>
       <p className="text-slate-500 mb-8 leading-relaxed">
         Sharpe reads TxLINE's free World Cup tier. No credentials are shipped with this app —
         your wallet provisions its own, once, and they stay in your browser.
@@ -76,7 +76,7 @@ export default function Onboard() {
                         : i + 1}
                     </span>
                     <div>
-                      <div className="text-sm font-bold text-[#1E3A5F]">{s.title}</div>
+                      <div className="text-sm font-bold text-ink">{s.title}</div>
                       <div className="text-xs text-slate-500 leading-relaxed">{s.detail}</div>
                     </div>
                   </li>
@@ -107,8 +107,8 @@ export default function Onboard() {
       {connected && (
         <Card className="p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-bold text-[#1E3A5F]">Devnet USDT</h2>
-            <span className="font-num text-sm font-bold text-[#1E3A5F]">{usdt === null ? '—' : `${usdt.toFixed(2)}`}</span>
+            <h2 className="text-sm font-bold text-ink">Devnet USDT</h2>
+            <span className="font-num text-sm font-bold text-ink">{usdt === null ? '—' : `${usdt.toFixed(2)}`}</span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed mb-4">
             Prop duels are staked in devnet USDT, never in TxL — the TxLINE credit token is locked

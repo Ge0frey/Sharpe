@@ -56,7 +56,7 @@ export default function Duels() {
   return (
     <div>
       <header className="mb-8">
-        <h1 className="text-3xl font-display font-extrabold text-[#1E3A5F] mb-2">Prop duels</h1>
+        <h1 className="text-3xl font-display font-extrabold text-ink mb-2">Prop duels</h1>
         <p className="text-slate-500 max-w-2xl leading-relaxed">
           Head-to-head wagers on markets no bookmaker lists — combined corners, cards, first-half totals.
           Both stakes sit in a neutral vault whose only authority is the program. A Merkle proof of the
@@ -64,7 +64,7 @@ export default function Duels() {
         </p>
         {wallet && (
           <div className="mt-3 text-sm text-slate-500">
-            Your devnet USDT: <span className="font-num font-bold text-[#1E3A5F]">{balance.data?.toFixed(2) ?? '—'}</span>
+            Your devnet USDT: <span className="font-num font-bold text-ink">{balance.data?.toFixed(2) ?? '—'}</span>
             {' · '}<a className="text-[#FF6B35] font-bold hover:underline" href="/onboard">get more from the TxLINE faucet</a>
           </div>
         )}
@@ -113,7 +113,7 @@ function CreateForm({ fixtures, onCreate, busy }: {
 
   return (
     <Card className="p-6">
-      <h2 className="text-base font-display font-extrabold text-[#1E3A5F] mb-4">Offer a duel</h2>
+      <h2 className="text-base font-display font-extrabold text-ink mb-4">Offer a duel</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <Field label="Match">
           <select className="w-full bg-[#F8F7F5] rounded-xl px-3 py-2.5 text-sm" value={fixtureId ?? ''}
@@ -152,7 +152,7 @@ function CreateForm({ fixtures, onCreate, busy }: {
         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2">You take</span>
         {[true, false].map((o) => (
           <button key={String(o)} type="button" onClick={() => setOver(o)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold ${over === o ? 'bg-[#FF6B35]/10 ring-2 ring-[#FF6B35] text-[#1E3A5F]' : 'bg-[#F8F7F5] text-slate-500'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-bold ${over === o ? 'bg-[#FF6B35]/10 ring-2 ring-[#FF6B35] text-ink' : 'bg-[#F8F7F5] text-slate-500'}`}>
             {o ? market.sides[0] : market.sides[1]}
           </button>
         ))}
@@ -178,27 +178,27 @@ function DuelRow({ d, me, busy, onJoin, onCancel, onResolve, onClaim, onRefund }
   const winner = d.outcomeTrue === d.creatorTakesTrue ? d.creator : d.taker
   const iWon = st !== 'matched' && me === winner.toBase58()
 
-  const tone = { open: 'amber', matched: 'navy', resolved: 'accent', settled: 'green', cancelled: 'muted', refunded: 'muted' }[st] ?? 'muted'
+  const tone = { open: 'amber', matched: 'ink', resolved: 'accent', settled: 'green', cancelled: 'muted', refunded: 'muted' }[st] ?? 'muted'
 
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-center gap-3">
         <Badge tone={tone as any}>{st}</Badge>
-        <div className="font-bold text-sm text-[#1E3A5F]">
+        <div className="font-bold text-sm text-ink">
           {d.hasStatB ? `stat ${d.statAKey} + ${d.statBKey}` : `stat ${d.statAKey}`}
           {' '}{d.comparison === 1 ? '<' : d.comparison === 2 ? '=' : '>'} {d.threshold}
         </div>
         <div className="text-xs text-slate-400 font-num">fixture {String(d.fixtureId)}</div>
-        <div className="ml-auto font-num text-sm font-bold text-[#1E3A5F]">
+        <div className="ml-auto font-num text-sm font-bold text-ink">
           {usdt(d.stakeAmount)} <span className="text-slate-400 font-normal">USDT/side</span>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-500">
-        <span>creator takes <b className="text-[#1E3A5F]">{d.creatorTakesTrue ? 'Over' : 'Under'}</b>{mine && ' (you)'}</span>
-        {st !== 'open' && <span>taker takes <b className="text-[#1E3A5F]">{d.creatorTakesTrue ? 'Under' : 'Over'}</b>{isTaker && ' (you)'}</span>}
+        <span>creator takes <b className="text-ink">{d.creatorTakesTrue ? 'Over' : 'Under'}</b>{mine && ' (you)'}</span>
+        {st !== 'open' && <span>taker takes <b className="text-ink">{d.creatorTakesTrue ? 'Under' : 'Over'}</b>{isTaker && ' (you)'}</span>}
         {(st === 'resolved' || st === 'settled') && (
-          <span>proven predicate <b className="text-[#1E3A5F]">{String(d.outcomeTrue)}</b> → winner <a className="text-[#FF6B35] hover:underline" href={explorerAddr(winner.toBase58())} target="_blank" rel="noreferrer">{winner.toBase58().slice(0, 8)}…</a>{iWon && ' (you)'}</span>
+          <span>proven predicate <b className="text-ink">{String(d.outcomeTrue)}</b> → winner <a className="text-[#FF6B35] hover:underline" href={explorerAddr(winner.toBase58())} target="_blank" rel="noreferrer">{winner.toBase58().slice(0, 8)}…</a>{iWon && ' (you)'}</span>
         )}
         <a className="text-slate-400 hover:text-[#FF6B35] inline-flex items-center gap-1" href={explorerAddr(d.pubkey)} target="_blank" rel="noreferrer">
           escrow <Icon icon="lucide:external-link" className="text-[10px]" />

@@ -13,13 +13,14 @@ export function Card({ children, className = '', hover = false, onClick, style }
 
 export function Button({ children, onClick, disabled, variant = 'primary', className = '' }: {
   children: ReactNode; onClick?: () => void; disabled?: boolean
-  variant?: 'primary' | 'navy' | 'ghost' | 'outline'; className?: string
+  variant?: 'primary' | 'ink' | 'ghost' | 'outline'; className?: string
 }) {
   const styles = {
     primary: 'btn-shine accent-gradient text-white glow-accent hover:-translate-y-0.5',
-    navy: 'bg-[#1E3A5F] text-white hover:bg-[#152945]',
+    // Ink is already near-black, so hover lightens rather than darkens.
+    ink: 'bg-ink text-white hover:bg-ink-800',
     ghost: 'text-slate-500 hover:bg-slate-100',
-    outline: 'bg-white border border-slate-200 text-[#1E3A5F] hover:border-[#FF6B35]/50 hover:text-[#FF6B35]',
+    outline: 'bg-white border border-slate-200 text-ink hover:border-[#FF6B35]/50 hover:text-[#FF6B35]',
   }[variant]
   return (
     <button type="button" onClick={onClick} disabled={disabled}
@@ -30,14 +31,14 @@ export function Button({ children, onClick, disabled, variant = 'primary', class
 }
 
 export function Badge({ children, tone = 'muted' }: {
-  children: ReactNode; tone?: 'green' | 'red' | 'muted' | 'amber' | 'accent' | 'navy'
+  children: ReactNode; tone?: 'green' | 'red' | 'muted' | 'amber' | 'accent' | 'ink'
 }) {
   const t = {
     green: 'bg-emerald-50 text-emerald-700',
     red: 'bg-red-50 text-red-600',
     amber: 'bg-amber-50 text-amber-600',
     accent: 'bg-[#FF6B35]/10 text-[#FF6B35]',
-    navy: 'bg-[#1E3A5F]/10 text-[#1E3A5F]',
+    ink: 'bg-ink/10 text-ink',
     muted: 'bg-slate-100 text-slate-500',
   }[tone]
   return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${t}`}>{children}</span>

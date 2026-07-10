@@ -50,7 +50,7 @@ export default function Leaderboard() {
     <div>
       <div className="flex items-center gap-4 mb-6 reveal">
         <span className="font-num text-sm font-bold text-[#FF6B35]/60">01</span>
-        <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#1E3A5F]">Global Rankings</h1>
+        <h1 className="text-4xl md:text-5xl font-display font-extrabold text-ink">Global Rankings</h1>
       </div>
 
       {/* CLV explainer */}
@@ -60,14 +60,14 @@ export default function Leaderboard() {
             <Icon icon="lucide:trending-up" className="text-[#FF6B35] text-2xl" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-[#1E3A5F] mb-1">Ranked by cumulative Closing Line Value</h3>
+            <h3 className="text-lg font-bold text-ink mb-1">Ranked by cumulative Closing Line Value</h3>
             <p className="text-slate-500 leading-relaxed">
               CLV measures your edge against the market — the gap between the line you locked and the final closing price.
               Every number here is Merkle-proven on Solana, so the ranking is trustless.
             </p>
             <p className="text-sm text-slate-400 leading-relaxed mt-2">
-              Ranked calls only: the program marks a prediction <span className="font-num text-[#1E3A5F]">ranked</span> just when it was
-              committed before a kickoff proven by <span className="font-num text-[#1E3A5F]">validate_fixture</span>. You cannot bet a match
+              Ranked calls only: the program marks a prediction <span className="font-num text-ink">ranked</span> just when it was
+              committed before a kickoff proven by <span className="font-num text-ink">validate_fixture</span>. You cannot bet a match
               whose result you already know.{backtests > 0 && ` ${backtests} backtest${backtests === 1 ? '' : 's'} excluded.`}
             </p>
           </div>
@@ -96,7 +96,7 @@ export default function Leaderboard() {
                 <div className={`mx-auto w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold ${medal[idx]}`}>{idx + 1}</div>
                 <img src={avatar(r.k)} alt="" className={`mx-auto mt-3 rounded-full bg-slate-100 border-2 border-white shadow-sm ${first ? 'w-16 h-16' : 'w-12 h-12'}`} />
                 {first && <Icon icon="lucide:crown" className="text-[#FF6B35] text-xl mt-2" />}
-                <div className="font-num font-bold text-sm text-[#1E3A5F] mt-2 inline-flex items-center gap-1.5">{short(r.k)}{isMe && <Badge tone="amber">You</Badge>}</div>
+                <div className="font-num font-bold text-sm text-ink mt-2 inline-flex items-center gap-1.5">{short(r.k)}{isMe && <Badge tone="amber">You</Badge>}</div>
                 <div className={`font-display font-extrabold mt-1 ${first ? 'text-2xl' : 'text-xl'}`}>
                   {r.closed ? <CLV bps={r.cum} /> : <span className="text-slate-300">—</span>}
                 </div>
@@ -129,7 +129,7 @@ export default function Leaderboard() {
                 </div>
                 <div className="col-span-6 md:col-span-4 flex items-center gap-3">
                   <img src={avatar(r.k)} alt="" className="w-9 h-9 rounded-full bg-slate-100 border-2 border-white shadow-sm" />
-                  <span className="font-num font-bold text-sm text-[#1E3A5F]">{short(r.k)}</span>
+                  <span className="font-num font-bold text-sm text-ink">{short(r.k)}</span>
                   {isMe && <Badge tone="amber">You</Badge>}
                 </div>
                 <div className="hidden md:block md:col-span-3 pr-6">

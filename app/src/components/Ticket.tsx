@@ -65,7 +65,7 @@ export default function Ticket({ fixture }: { fixture: any }) {
       <div className="w-16 h-16 rounded-2xl bg-emerald-50 mx-auto flex items-center justify-center mb-4 ring-pulse">
         <Icon icon="lucide:shield-check" className="text-emerald-500 text-3xl" />
       </div>
-      <div className="text-lg font-display font-extrabold text-[#1E3A5F] mb-1">Call committed on-chain</div>
+      <div className="text-lg font-display font-extrabold text-ink mb-1">Call committed on-chain</div>
       <p className="text-sm text-slate-500 leading-relaxed mb-5">
         Your entry quote is pinned by its message hash. TxLINE publishes the odds Merkle root for it on the
         next 5-minute batch — then anyone (you, or the keeper) can prove the line. Track it in your portfolio.
@@ -109,7 +109,7 @@ export default function Ticket({ fixture }: { fixture: any }) {
                   <button key={g.key} type="button" aria-pressed={g.key === activeGroup.key}
                     onClick={() => { setGroup(g.key); setSel(null) }}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-                      g.key === activeGroup.key ? 'bg-white text-[#1E3A5F] shadow-sm' : 'text-slate-400 hover:text-[#1E3A5F]'}`}>
+                      g.key === activeGroup.key ? 'bg-white text-ink shadow-sm' : 'text-slate-400 hover:text-ink'}`}>
                     {g.label}
                   </button>
                 ))}
@@ -125,10 +125,10 @@ export default function Ticket({ fixture }: { fixture: any }) {
                 return (
                   <button key={m.key} type="button" aria-pressed={active} disabled={!price}
                     onClick={() => setSel(m.key)}
-                    className={`rounded-xl p-3 text-center transition-[transform,background-color,box-shadow] duration-150 ease-out disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A5F] focus-visible:ring-offset-2 ${
+                    className={`rounded-xl p-3 text-center transition-[transform,background-color,box-shadow] duration-150 ease-out disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 ${
                       active
-                        ? 'bg-[#FF6B35]/10 ring-2 ring-[#FF6B35] text-[#1E3A5F] -translate-y-0.5 shadow-sm'
-                        : 'bg-[#F8F7F5] hover:bg-slate-100 text-[#1E3A5F]'
+                        ? 'bg-[#FF6B35]/10 ring-2 ring-[#FF6B35] text-ink -translate-y-0.5 shadow-sm'
+                        : 'bg-[#F8F7F5] hover:bg-slate-100 text-ink'
                     }`}>
                     <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">{m.label}</div>
                     <div className="font-num font-extrabold text-lg mt-1">{price ? decimal(price) : '—'}</div>
@@ -143,8 +143,8 @@ export default function Ticket({ fixture }: { fixture: any }) {
               <Row label="Entry implied prob" value={entryRec ? `${probPct(entryRec.Prices[market.priceIndex]).toFixed(2)}%` : '—'} accent />
               <Row label="Settles on stat keys" value={market.period === 1 ? '1001 / 1002' : '1 / 2'} />
               <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-500 leading-relaxed">
-                Scored against the closing consensus line, both proven via <span className="text-[#1E3A5F] font-bold">validate_odds</span>.
-                Ranked only if you commit before the kickoff proven by <span className="text-[#1E3A5F] font-bold">validate_fixture</span>. No stake.
+                Scored against the closing consensus line, both proven via <span className="text-ink font-bold">validate_odds</span>.
+                Ranked only if you commit before the kickoff proven by <span className="text-ink font-bold">validate_fixture</span>. No stake.
               </div>
             </div>
 
@@ -182,7 +182,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-slate-500 font-medium">{label}</span>
-      <span className={`font-num text-sm font-bold ${accent ? 'text-[#FF6B35]' : 'text-[#1E3A5F]'}`}>{value}</span>
+      <span className={`font-num text-sm font-bold ${accent ? 'text-[#FF6B35]' : 'text-ink'}`}>{value}</span>
     </div>
   )
 }

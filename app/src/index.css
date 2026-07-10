@@ -1,13 +1,26 @@
 @import "tailwindcss";
 
+/* Ink is the brand's primary colour: near-black for type and marks, a ladder of
+   blacks for surfaces. Surfaces lighten as they elevate. Registered with Tailwind
+   so `text-ink`, `bg-ink-900`, `ring-ink`, `bg-ink/10` all exist as real utilities. */
+@theme {
+  --color-ink: #0F0F0F;
+  --color-ink-950: #000000;
+  --color-ink-900: #0A0A0A;
+  --color-ink-800: #141414;
+  /* #FF6B35 is the display accent: fills, glows, marks, and text on dark planes.
+     As text on a light plane it only reaches 2.8:1, so `accent-ink` is the readable
+     sibling (7.3:1 on white, 6.2:1 on its own 10% tint). */
+  --color-accent: #FF6B35;
+  --color-accent-ink: #9A3412;
+}
+
 :root {
   color-scheme: light;
-  --navy: #1E3A5F;
-  --navy-deep: #152945;
   --accent: #FF6B35;
   --accent-2: #E85A2A;
   --cream: #F8F7F5;
-  --ink: #1E3A5F;
+  --ink: var(--color-ink);
   --muted: #64748B;
   --ok: #10B981;
   --bad: #EF4444;
@@ -15,19 +28,19 @@
   --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
 }
 
-/* Textured cream: soft coral/navy glow + blueprint dot-grid */
+/* Textured cream: soft coral glow + blueprint dot-grid */
 body {
   color: var(--ink);
   font-family: 'Satoshi', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
   background-color: var(--cream);
-  /* Page-wide blueprint grid (navy on light). Shows through every transparent section. */
+  /* Page-wide blueprint grid, neutral ink on light. Shows through every transparent section. */
   background-image:
     radial-gradient(60% 45% at 12% 4%, rgba(255, 107, 53, 0.07), transparent 70%),
-    radial-gradient(50% 40% at 92% 0%, rgba(30, 58, 95, 0.06), transparent 70%),
-    linear-gradient(rgba(30, 58, 95, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30, 58, 95, 0.07) 1px, transparent 1px);
+    radial-gradient(50% 40% at 92% 0%, rgba(0, 0, 0, 0.05), transparent 70%),
+    linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
   background-size: auto, auto, 46px 46px, 46px 46px;
   /* Every layer is viewport-anchored, including the grid. A `scroll` grid is
      painted from the document top while each dark section's `.grid-overlay` is
@@ -45,25 +58,25 @@ body {
 /* ── Surfaces: layered, low-opacity elevation (varies by role) ── */
 .soft-card {
   background: #FFFFFF;
-  box-shadow: 0 1px 2px rgba(30, 58, 95, 0.04), 0 10px 26px -14px rgba(30, 58, 95, 0.14);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 10px 26px -14px rgba(0, 0, 0, 0.10);
   transition: box-shadow .4s var(--ease-out), transform .4s var(--ease-out);
 }
 .soft-card-hover:hover {
-  box-shadow: 0 2px 6px rgba(30, 58, 95, 0.06), 0 24px 44px -18px rgba(30, 58, 95, 0.22);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), 0 24px 44px -18px rgba(0, 0, 0, 0.16);
   transform: translateY(-5px);
 }
 .row-hover:hover {
-  box-shadow: 0 2px 6px rgba(30, 58, 95, 0.06), 0 20px 36px -18px rgba(30, 58, 95, 0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), 0 20px 36px -18px rgba(0, 0, 0, 0.13);
   transform: translateY(-2px);
   position: relative;
   z-index: 10;
 }
-.elev-lg { box-shadow: 0 2px 8px rgba(30, 58, 95, 0.05), 0 40px 80px -28px rgba(30, 58, 95, 0.28); }
-.ring-inset { box-shadow: inset 0 0 0 1px rgba(30, 58, 95, 0.05), 0 10px 26px -14px rgba(30, 58, 95, 0.14); }
+.elev-lg { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 40px 80px -28px rgba(0, 0, 0, 0.20); }
+.ring-inset { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04), 0 10px 26px -14px rgba(0, 0, 0, 0.10); }
 
 .accent-gradient { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%); }
 .glow-accent { box-shadow: 0 12px 30px -8px rgba(255, 107, 53, 0.45); }
-.line-divider { height: 1px; background: linear-gradient(90deg, rgba(30,58,95,0.18), rgba(30,58,95,0.04) 60%, transparent); }
+.line-divider { height: 1px; background: linear-gradient(90deg, rgba(0,0,0,0.14), rgba(0,0,0,0.03) 60%, transparent); }
 
 /* ── Button shine sweep ── */
 .btn-shine { position: relative; overflow: hidden; }
@@ -126,7 +139,7 @@ body {
 .meter-fill { transition: width 1s var(--ease-out); }
 
 /* ══ ELECTRIC / WORLD CUP LAYER ═══════════════════════════════════════════ */
-:root { --navy-night: #0C1B30; --amber: #FFA83D; }
+:root { --amber: #FFA83D; }
 
 /* Stadium-light glow blobs (blurred, slowly drifting) */
 .glow-blob { position: absolute; border-radius: 9999px; filter: blur(70px); will-change: transform; pointer-events: none; }
@@ -145,12 +158,9 @@ body {
   mask-image: linear-gradient(to top, #000 0%, transparent 72%);
 }
 
-/* White blueprint grid for dark sections. Same 46px cell + left origin as the
-   page grid, so the vertical lines stay colinear across every section boundary
-   — the grid reads continuous, only its colour flips light↔navy. */
-/* The white grid painted over dark sections. Viewport-anchored to match the
-   navy grid on <body>, so the lines continue unbroken across the boundary
-   between a light section and a dark one. */
+/* The white grid painted over dark sections. Same 46px cell, and viewport-anchored
+   to match the ink grid on <body>, so the lines run unbroken across every boundary
+   between a light section and a dark one. Only the colour flips. */
 .grid-overlay {
   position: absolute; inset: 0; pointer-events: none;
   background-image:
@@ -173,7 +183,7 @@ body {
 .marquee-xl { display: inline-flex; white-space: nowrap; animation: marquee-xl var(--mq, 24s) linear infinite; }
 .marquee-xl-rev { animation-direction: reverse; }
 .marquee-band:hover .marquee-xl { animation-play-state: paused; }
-.text-outline { color: transparent; -webkit-text-stroke: 1.6px rgba(30,58,95,0.35); }
+.text-outline { color: transparent; -webkit-text-stroke: 1.6px rgba(0,0,0,0.28); }
 
 /* Floating score chips */
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
@@ -186,16 +196,16 @@ body {
 
 /* Card hover with coral lift */
 .lift { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out); }
-.lift:hover { transform: translateY(-6px); box-shadow: 0 2px 8px rgba(30,58,95,0.05), 0 34px 60px -22px rgba(255,107,53,0.35); }
+.lift:hover { transform: translateY(-6px); box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 34px 60px -22px rgba(255,107,53,0.35); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::after, *::before { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; }
 }
 
-/* ── Wallet adapter -> navy pill ── */
+/* ── Wallet adapter -> ink pill ── */
 .wallet-adapter-button {
-  background: var(--navy) !important;
+  background: var(--color-ink-900) !important;
   color: #ffffff !important;
   height: 42px !important;
   padding: 0 22px !important;
@@ -203,15 +213,28 @@ body {
   font-weight: 700 !important;
   font-family: 'Satoshi', 'Plus Jakarta Sans', sans-serif !important;
   border-radius: 9999px !important;
-  box-shadow: 0 8px 20px -10px rgba(30, 58, 95, 0.55) !important;
-  transition: background .2s ease, transform .2s var(--ease-out) !important;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.40) !important;
+  /* box-shadow rides along so the dark state's inset ring fades rather than snaps. */
+  transition: background .3s ease, box-shadow .3s ease, transform .2s var(--ease-out) !important;
 }
-.wallet-adapter-button:not([disabled]):hover { background: var(--navy-deep) !important; transform: translateY(-1px); }
-.wallet-adapter-button-trigger { background: var(--navy) !important; }
+.wallet-adapter-button:not([disabled]):hover { background: var(--color-ink-800) !important; transform: translateY(-1px); }
+.wallet-adapter-button-trigger { background: var(--color-ink-900) !important; }
+
+/* Over the black hero an ink pill is a near-invisible slab. Match the hero's own
+   frosted badges instead: a white wash with a hairline ring. */
+header[data-nav="dark"] .wallet-adapter-button,
+header[data-nav="dark"] .wallet-adapter-button-trigger {
+  background: rgba(255, 255, 255, 0.10) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16) !important;
+}
+header[data-nav="dark"] .wallet-adapter-button:not([disabled]):hover,
+header[data-nav="dark"] .wallet-adapter-button-trigger:not([disabled]):hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
 .wallet-adapter-dropdown-list {
   background: #ffffff !important;
-  box-shadow: 0 24px 44px -18px rgba(30, 58, 95, 0.28) !important;
+  box-shadow: 0 24px 44px -18px rgba(0, 0, 0, 0.20) !important;
   border: 1px solid #f1f5f9 !important;
 }
-.wallet-adapter-dropdown-list-item { color: var(--navy) !important; }
+.wallet-adapter-dropdown-list-item { color: var(--color-ink) !important; }
 .wallet-adapter-dropdown-list-item:not([disabled]):hover { background: var(--cream) !important; }

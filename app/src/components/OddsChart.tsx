@@ -13,8 +13,8 @@ export default function OddsChart({ data }: { data: TrajPoint[] }) {
         <ComposedChart data={rows} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
           <defs>
             <linearGradient id="oc-home" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1E3A5F" stopOpacity={0.18} />
-              <stop offset="100%" stopColor="#1E3A5F" stopOpacity={0} />
+              <stop offset="0%" stopColor="#0F0F0F" stopOpacity={0.18} />
+              <stop offset="100%" stopColor="#0F0F0F" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#eef2f6" vertical={false} />
@@ -22,10 +22,10 @@ export default function OddsChart({ data }: { data: TrajPoint[] }) {
           <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} stroke="#e2e8f0" unit="%" domain={['auto', 'auto']} />
           <Tooltip
             cursor={{ stroke: '#FF6B35', strokeWidth: 1, strokeDasharray: '4 4' }}
-            contentStyle={{ background: '#ffffff', border: 'none', borderRadius: 12, fontSize: 12, boxShadow: '0 24px 44px -18px rgba(30,58,95,0.28)' }} />
+            contentStyle={{ background: '#ffffff', border: 'none', borderRadius: 12, fontSize: 12, boxShadow: '0 24px 44px -18px rgba(0,0,0,0.20)' }} />
           <Legend wrapperStyle={{ fontSize: 12 }} iconType="plainline" />
-          <Area type="monotone" dataKey="Home" stroke="#1E3A5F" strokeWidth={3} fill="url(#oc-home)"
-            dot={false} activeDot={{ r: 5, fill: '#1E3A5F', stroke: '#fff', strokeWidth: 2 }}
+          <Area type="monotone" dataKey="Home" stroke="#0F0F0F" strokeWidth={3} fill="url(#oc-home)"
+            dot={false} activeDot={{ r: 5, fill: '#0F0F0F', stroke: '#fff', strokeWidth: 2 }}
             isAnimationActive animationDuration={1400} animationEasing="ease-out" />
           <Line type="monotone" dataKey="Draw" stroke="#94a3b8" strokeWidth={1.5} dot={false}
             activeDot={{ r: 4, fill: '#94a3b8', stroke: '#fff', strokeWidth: 2 }}

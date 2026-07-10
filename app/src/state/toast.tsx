@@ -37,7 +37,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-hidden
             />
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-[#1E3A5F] break-words">{t.msg}</div>
+              <div className="text-sm font-semibold text-ink break-words">{t.msg}</div>
               {t.href && (
                 <a href={t.href} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs font-bold text-[#FF6B35] hover:underline">
                   View transaction <Icon icon="lucide:external-link" className="text-[10px]" aria-hidden />
