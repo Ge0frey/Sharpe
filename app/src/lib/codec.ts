@@ -1,5 +1,7 @@
 import { BN } from "@coral-xyz/anchor";
 import { Buffer } from "buffer";
+// @noble/hashes v2 moved sha256 into sha2, and only exports the `.js` specifier.
+import { sha256 } from "@noble/hashes/sha2.js";
 
 /**
  * 32-byte Merkle hash/root -> number[] for Anchor.
@@ -69,4 +71,48 @@ export function statTerm(v: any, which: 1 | 2) {
     eventStatRoot: b64ToBytes(v.eventStatRoot),
     statProof: nodes(which === 1 ? v.statProof : v.statProof2),
   };
+}
+
+/** TxLINE fixture JSON (PascalCase) -> program `Fixture` (camelCase). */
+export function fixtureToProgram(f: any) {
+  return {
+    ts: new BN(f.Ts),
+    startTime: new BN(f.StartTime),
+    competition: f.Competition,
+    competitionId: f.CompetitionId,
+    fixtureGroupId: f.FixtureGroupId,
+    participant1Id: f.Participant1Id,
+    participant1: f.Participant1,
+    participant2Id: f.Participant2Id,
+    participant2: f.Participant2,
+    fixtureId: new BN(f.FixtureId),
+    participant1IsHome: !!f.Participant1IsHome,
+  };
+}
+
+/**
+ * `/fixtures/validation` returns `updateSubTreeRoot` as a JSON byte array, unlike
+ * the odds/scores summaries which are base64. `b64ToBytes` accepts both shapes.
+ */
+export function fixtureSummary(s: any) {
+  return {
+    fixtureId: new BN(s.fixtureId),
+    competitionId: s.competitionId,
+    competition: s.competition,
+    updateStats: {
+      updateCount: s.updateStats.updateCount,
+      minTimestamp: new BN(s.updateStats.minTimestamp),
+      maxTimestamp: new BN(s.updateStats.maxTimestamp),
+    },
+    updateSubTreeRoot: b64ToBytes(s.updateSubTreeRoot),
+  };
+}
+
+/**
+ * Pins which quote a prediction was opened against. The program recomputes
+ * `sha256(odds.message_id)` in `prove_entry` and refuses any other record, so a
+ * deferred proof cannot substitute a better line quoted in the same millisecond.
+ */
+export function msgHash(messageId: string): number[] {
+  return [...sha256(new TextEncoder().encode(messageId))];
 }

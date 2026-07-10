@@ -8,6 +8,353 @@
   },
   "instructions": [
     {
+      "name": "cancel_duel",
+      "docs": [
+        "Withdraw an unmatched offer."
+      ],
+      "discriminator": [
+        83,
+        124,
+        224,
+        237,
+        235,
+        44,
+        38,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel.fixture_id",
+                "account": "Duel"
+              },
+              {
+                "kind": "account",
+                "path": "duel.duel_id",
+                "account": "Duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_duel",
+      "docs": [
+        "Pay both stakes to the proven winner. Permissionless; destination is on-chain."
+      ],
+      "discriminator": [
+        156,
+        123,
+        129,
+        143,
+        233,
+        77,
+        201,
+        172
+      ],
+      "accounts": [
+        {
+          "name": "claimer",
+          "docs": [
+            "Permissionless: winner, loser or keeper. The destination is fixed on-chain."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel.fixture_id",
+                "account": "Duel"
+              },
+              {
+                "kind": "account",
+                "path": "duel.duel_id",
+                "account": "Duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "winner"
+        },
+        {
+          "name": "winner_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_duel",
+      "docs": [
+        "Offer a duel and escrow the creator's stake. Any market; no odds line needed."
+      ],
+      "discriminator": [
+        49,
+        28,
+        93,
+        11,
+        75,
+        242,
+        69,
+        165
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fixture_facts",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              },
+              {
+                "kind": "arg",
+                "path": "duel_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "Neutral escrow. Authority is the duel PDA, so no human can move these funds."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "creator_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "duel_id",
+          "type": "u64"
+        },
+        {
+          "name": "fixture_id",
+          "type": "i64"
+        },
+        {
+          "name": "market",
+          "type": {
+            "defined": {
+              "name": "MarketKind"
+            }
+          }
+        },
+        {
+          "name": "family",
+          "type": {
+            "defined": {
+              "name": "StatFamily"
+            }
+          }
+        },
+        {
+          "name": "period",
+          "type": "u16"
+        },
+        {
+          "name": "selection",
+          "type": "u8"
+        },
+        {
+          "name": "line_x10",
+          "type": "i16"
+        },
+        {
+          "name": "stake_amount",
+          "type": "u64"
+        },
+        {
+          "name": "creator_takes_true",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "initialize_config",
       "discriminator": [
         208,
@@ -52,7 +399,98 @@
       "args": []
     },
     {
+      "name": "join_duel",
+      "docs": [
+        "Take the other side. Locked once the proven kickoff passes."
+      ],
+      "discriminator": [
+        7,
+        247,
+        76,
+        103,
+        101,
+        139,
+        254,
+        61
+      ],
+      "accounts": [
+        {
+          "name": "taker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel.fixture_id",
+                "account": "Duel"
+              },
+              {
+                "kind": "account",
+                "path": "duel.duel_id",
+                "account": "Duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "taker_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "open_prediction",
+      "docs": [
+        "Commit to a call. Cheap, no CPI — see `prove_entry` for why the proof is deferred."
+      ],
       "discriminator": [
         133,
         18,
@@ -89,6 +527,30 @@
           }
         },
         {
+          "name": "fixture_facts",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "fixture_facts.fixture_id",
+                "account": "FixtureFacts"
+              }
+            ]
+          }
+        },
+        {
           "name": "prediction",
           "writable": true,
           "pda": {
@@ -120,13 +582,6 @@
           }
         },
         {
-          "name": "daily_odds_merkle_roots"
-        },
-        {
-          "name": "txoracle_program",
-          "address": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
-        },
-        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
@@ -149,6 +604,18 @@
           }
         },
         {
+          "name": "family",
+          "type": {
+            "defined": {
+              "name": "StatFamily"
+            }
+          }
+        },
+        {
+          "name": "period",
+          "type": "u16"
+        },
+        {
           "name": "selection",
           "type": "u8"
         },
@@ -157,12 +624,90 @@
           "type": "i16"
         },
         {
-          "name": "price_index",
-          "type": "u8"
-        },
-        {
           "name": "entry_ts",
           "type": "i64"
+        },
+        {
+          "name": "entry_msg_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "prove_entry",
+      "docs": [
+        "Prove the committed entry line once its 5-minute odds root is published."
+      ],
+      "discriminator": [
+        102,
+        56,
+        145,
+        255,
+        97,
+        119,
+        241,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "prover",
+          "docs": [
+            "Permissionless: the predictor, a keeper, or anyone may land the proof.",
+            "It can only ever write the one price the record commits to."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "prediction",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  101,
+                  100,
+                  105,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "prediction.predictor",
+                "account": "Prediction"
+              },
+              {
+                "kind": "account",
+                "path": "prediction.id",
+                "account": "Prediction"
+              }
+            ]
+          }
+        },
+        {
+          "name": "daily_odds_merkle_roots"
+        },
+        {
+          "name": "txoracle_program",
+          "address": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
+        }
+      ],
+      "args": [
+        {
+          "name": "price_index",
+          "type": "u8"
         },
         {
           "name": "odds",
@@ -196,6 +741,318 @@
             "vec": {
               "defined": {
                 "name": "ProofNode"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "prove_fixture",
+      "docs": [
+        "Prove a fixture's kickoff once (CPI validate_fixture). Every timing guard",
+        "in this program is anchored to the `start_time` recorded here."
+      ],
+      "discriminator": [
+        169,
+        85,
+        140,
+        209,
+        107,
+        173,
+        168,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "prover",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fixture_facts",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ten_daily_fixtures_roots"
+        },
+        {
+          "name": "txoracle_program",
+          "address": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fixture_id",
+          "type": "i64"
+        },
+        {
+          "name": "snapshot",
+          "type": {
+            "defined": {
+              "name": "Fixture"
+            }
+          }
+        },
+        {
+          "name": "summary",
+          "type": {
+            "defined": {
+              "name": "FixtureBatchSummary"
+            }
+          }
+        },
+        {
+          "name": "sub_tree_proof",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "ProofNode"
+              }
+            }
+          }
+        },
+        {
+          "name": "main_tree_proof",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "ProofNode"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "refund_duel",
+      "docs": [
+        "Escape hatch for a matched duel whose result never became provable."
+      ],
+      "discriminator": [
+        102,
+        85,
+        18,
+        136,
+        100,
+        103,
+        76,
+        189
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel.fixture_id",
+                "account": "Duel"
+              },
+              {
+                "kind": "account",
+                "path": "duel.duel_id",
+                "account": "Duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "taker"
+        },
+        {
+          "name": "creator_token_account",
+          "writable": true
+        },
+        {
+          "name": "taker_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_duel",
+      "docs": [
+        "Prove the duel's predicate (CPI validate_stat). Permissionless; moves no funds."
+      ],
+      "discriminator": [
+        213,
+        162,
+        203,
+        235,
+        151,
+        236,
+        178,
+        64
+      ],
+      "accounts": [
+        {
+          "name": "resolver",
+          "docs": [
+            "Permissionless. The resolver pays the fee and gains nothing."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "duel",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  117,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "duel.fixture_id",
+                "account": "Duel"
+              },
+              {
+                "kind": "account",
+                "path": "duel.duel_id",
+                "account": "Duel"
+              }
+            ]
+          }
+        },
+        {
+          "name": "daily_scores_merkle_roots"
+        },
+        {
+          "name": "txoracle_program",
+          "address": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
+        }
+      ],
+      "args": [
+        {
+          "name": "ts",
+          "type": "i64"
+        },
+        {
+          "name": "fixture_summary",
+          "type": {
+            "defined": {
+              "name": "ScoresBatchSummary"
+            }
+          }
+        },
+        {
+          "name": "fixture_proof",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "ProofNode"
+              }
+            }
+          }
+        },
+        {
+          "name": "main_tree_proof",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "ProofNode"
+              }
+            }
+          }
+        },
+        {
+          "name": "stat_a",
+          "type": {
+            "defined": {
+              "name": "StatTerm"
+            }
+          }
+        },
+        {
+          "name": "stat_b",
+          "type": {
+            "option": {
+              "defined": {
+                "name": "StatTerm"
               }
             }
           }
@@ -249,6 +1106,30 @@
                 "kind": "account",
                 "path": "prediction.id",
                 "account": "Prediction"
+              }
+            ]
+          }
+        },
+        {
+          "name": "fixture_facts",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "fixture_facts.fixture_id",
+                "account": "FixtureFacts"
               }
             ]
           }
@@ -492,6 +1373,32 @@
       ]
     },
     {
+      "name": "Duel",
+      "discriminator": [
+        126,
+        229,
+        210,
+        60,
+        177,
+        135,
+        124,
+        224
+      ]
+    },
+    {
+      "name": "FixtureFacts",
+      "discriminator": [
+        236,
+        66,
+        236,
+        26,
+        57,
+        238,
+        239,
+        28
+      ]
+    },
+    {
       "name": "Prediction",
       "discriminator": [
         98,
@@ -506,6 +1413,84 @@
     }
   ],
   "events": [
+    {
+      "name": "DuelCreated",
+      "discriminator": [
+        137,
+        77,
+        22,
+        196,
+        90,
+        147,
+        23,
+        37
+      ]
+    },
+    {
+      "name": "DuelJoined",
+      "discriminator": [
+        44,
+        42,
+        14,
+        246,
+        9,
+        32,
+        169,
+        167
+      ]
+    },
+    {
+      "name": "DuelResolved",
+      "discriminator": [
+        224,
+        245,
+        214,
+        212,
+        111,
+        151,
+        50,
+        5
+      ]
+    },
+    {
+      "name": "DuelSettled",
+      "discriminator": [
+        254,
+        160,
+        50,
+        193,
+        155,
+        112,
+        122,
+        64
+      ]
+    },
+    {
+      "name": "EntryProven",
+      "discriminator": [
+        70,
+        205,
+        205,
+        24,
+        208,
+        184,
+        255,
+        33
+      ]
+    },
+    {
+      "name": "FixtureProven",
+      "discriminator": [
+        127,
+        114,
+        84,
+        106,
+        200,
+        170,
+        132,
+        78
+      ]
+    },
     {
       "name": "PredictionClosed",
       "discriminator": [
@@ -606,6 +1591,111 @@
       "code": 6011,
       "name": "Overflow",
       "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6012,
+      "name": "FixtureProofRejected",
+      "msg": "Fixture proof rejected by txoracle"
+    },
+    {
+      "code": 6013,
+      "name": "FixtureIdMismatch",
+      "msg": "Proven fixture record does not match the requested fixture id"
+    },
+    {
+      "code": 6014,
+      "name": "MarketTypeMismatch",
+      "msg": "Odds record is for a different market type"
+    },
+    {
+      "code": 6015,
+      "name": "MarketPeriodMismatch",
+      "msg": "Odds record is for a different match period"
+    },
+    {
+      "code": 6016,
+      "name": "LineMismatch",
+      "msg": "Odds record line does not match the prediction line"
+    },
+    {
+      "code": 6017,
+      "name": "UnsupportedLine",
+      "msg": "Line is not settleable as a single predicate (whole or quarter line)"
+    },
+    {
+      "code": 6018,
+      "name": "PriceNameMismatch",
+      "msg": "Price index does not name the selected outcome"
+    },
+    {
+      "code": 6019,
+      "name": "MarketHasNoOddsLine",
+      "msg": "This market has no consensus odds line and cannot carry CLV"
+    },
+    {
+      "code": 6020,
+      "name": "MarketFamilyMismatch",
+      "msg": "Market cannot be resolved against this stat family"
+    },
+    {
+      "code": 6021,
+      "name": "UnsupportedPeriod",
+      "msg": "Unsupported match period"
+    },
+    {
+      "code": 6022,
+      "name": "EntryAfterKickoff",
+      "msg": "Entry line is timestamped at or after the proven kickoff"
+    },
+    {
+      "code": 6023,
+      "name": "CloseAfterKickoff",
+      "msg": "Closing line is timestamped after the proven kickoff"
+    },
+    {
+      "code": 6024,
+      "name": "LineIsInPlay",
+      "msg": "Closing line was quoted in-play; it is not a closing line"
+    },
+    {
+      "code": 6025,
+      "name": "UnexpectedSecondStat",
+      "msg": "Second stat supplied for a single-stat market"
+    },
+    {
+      "code": 6026,
+      "name": "EntryRecordMismatch",
+      "msg": "Odds record is not the quote this prediction was opened against"
+    },
+    {
+      "code": 6027,
+      "name": "InvalidStake",
+      "msg": "Stake must be greater than zero"
+    },
+    {
+      "code": 6028,
+      "name": "DuelExpired",
+      "msg": "The fixture has kicked off; this duel can no longer be created or joined"
+    },
+    {
+      "code": 6029,
+      "name": "SelfDuel",
+      "msg": "A duel needs two sides"
+    },
+    {
+      "code": 6030,
+      "name": "StakeMintMismatch",
+      "msg": "Stake mint does not match the duel"
+    },
+    {
+      "code": 6031,
+      "name": "WrongWinner",
+      "msg": "Account is not the winner implied by the proven outcome"
+    },
+    {
+      "code": 6032,
+      "name": "RefundTooEarly",
+      "msg": "The refund grace period has not elapsed"
     }
   ],
   "types": [
@@ -634,6 +1724,468 @@
       }
     },
     {
+      "name": "Duel",
+      "docs": [
+        "A head-to-head wager on any stat predicate, escrowed in a neutral vault and",
+        "released by a Merkle proof. No admin, no oracle, no rake.",
+        "",
+        "This is the surface for markets no bookmaker lists — combined corners, cards,",
+        "per-half totals — because it needs only `validate_stat`, never a consensus line.",
+        "",
+        "Note the stake is **never TxL**: the TxLINE credit token is locked to its own",
+        "program for data authorisation and may not be transferred peer-to-peer."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "duel_id",
+            "type": "u64"
+          },
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "taker",
+            "docs": [
+              "`Pubkey::default()` until someone joins."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_amount",
+            "docs": [
+              "Each side stakes this; the winner takes both."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "market",
+            "type": {
+              "defined": {
+                "name": "MarketKind"
+              }
+            }
+          },
+          {
+            "name": "family",
+            "type": {
+              "defined": {
+                "name": "StatFamily"
+              }
+            }
+          },
+          {
+            "name": "period",
+            "type": "u16"
+          },
+          {
+            "name": "selection",
+            "type": "u8"
+          },
+          {
+            "name": "line_x10",
+            "type": "i16"
+          },
+          {
+            "name": "stat_a_key",
+            "type": "u32"
+          },
+          {
+            "name": "stat_b_key",
+            "type": "u32"
+          },
+          {
+            "name": "has_stat_b",
+            "type": "bool"
+          },
+          {
+            "name": "op_add",
+            "type": "bool"
+          },
+          {
+            "name": "comparison",
+            "type": "u8"
+          },
+          {
+            "name": "threshold",
+            "type": "i32"
+          },
+          {
+            "name": "creator_takes_true",
+            "docs": [
+              "The creator wins iff the proven predicate equals this."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "outcome_true",
+            "docs": [
+              "Written by `resolve_duel` from the CPI's return value. Meaningless until Resolved."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "DuelStatus"
+              }
+            }
+          },
+          {
+            "name": "expires_at",
+            "docs": [
+              "The PROVEN kickoff. A duel cannot be created or joined past it."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "settled_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DuelCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "duel_id",
+            "type": "u64"
+          },
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_amount",
+            "type": "u64"
+          },
+          {
+            "name": "creator_takes_true",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DuelJoined",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "duel_id",
+            "type": "u64"
+          },
+          {
+            "name": "taker",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DuelResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "duel_id",
+            "type": "u64"
+          },
+          {
+            "name": "outcome_true",
+            "type": "bool"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DuelSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "duel_id",
+            "type": "u64"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "payout",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DuelStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Matched"
+          },
+          {
+            "name": "Resolved"
+          },
+          {
+            "name": "Settled"
+          },
+          {
+            "name": "Cancelled"
+          },
+          {
+            "name": "Refunded"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EntryProven",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "predictor",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "entry_prob_bps",
+            "type": "u32"
+          },
+          {
+            "name": "entry_ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Fixture",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ts",
+            "type": "i64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "competition",
+            "type": "string"
+          },
+          {
+            "name": "competition_id",
+            "type": "i32"
+          },
+          {
+            "name": "fixture_group_id",
+            "type": "i32"
+          },
+          {
+            "name": "participant1_id",
+            "type": "i32"
+          },
+          {
+            "name": "participant1",
+            "type": "string"
+          },
+          {
+            "name": "participant2_id",
+            "type": "i32"
+          },
+          {
+            "name": "participant2",
+            "type": "string"
+          },
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "participant1_is_home",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FixtureBatchSummary",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "competition_id",
+            "type": "i32"
+          },
+          {
+            "name": "competition",
+            "type": "string"
+          },
+          {
+            "name": "update_stats",
+            "type": {
+              "defined": {
+                "name": "FixtureUpdateStats"
+              }
+            }
+          },
+          {
+            "name": "update_sub_tree_root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FixtureFacts",
+      "docs": [
+        "Kickoff time and identity for one fixture, proven once via `validate_fixture`",
+        "and then reused by every prediction on that fixture.",
+        "",
+        "Write-once by construction (`init`, never `init_if_needed`): the kickoff a",
+        "prediction was judged against can never be rewritten underneath it."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "docs": [
+              "The public id `/odds` and `/scores` key off, taken from `summary.fixture_id`,",
+              "which the Merkle proof binds to the snapshot."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "start_time",
+            "docs": [
+              "PROVEN kickoff — the anchor for every timing guard in this program."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "participant1_id",
+            "type": "i32"
+          },
+          {
+            "name": "participant2_id",
+            "type": "i32"
+          },
+          {
+            "name": "competition_id",
+            "type": "i32"
+          },
+          {
+            "name": "proven_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FixtureProven",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "prover",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FixtureUpdateStats",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "update_count",
+            "type": "u32"
+          },
+          {
+            "name": "min_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "max_timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
       "name": "MarketKind",
       "type": {
         "kind": "enum",
@@ -643,6 +2195,12 @@
           },
           {
             "name": "TotalsOu"
+          },
+          {
+            "name": "CombinedTotal"
+          },
+          {
+            "name": "TeamTotal"
           }
         ]
       }
@@ -788,8 +2346,8 @@
     {
       "name": "Prediction",
       "docs": [
-        "A single CLV prediction. Entry/close implied probabilities and the outcome",
-        "are all written only after a txoracle Merkle proof verifies."
+        "A single CLV prediction. Entry/close implied probabilities and the outcome are",
+        "all written only after a txoracle Merkle proof verifies."
       ],
       "type": {
         "kind": "struct",
@@ -815,6 +2373,18 @@
             }
           },
           {
+            "name": "family",
+            "type": {
+              "defined": {
+                "name": "StatFamily"
+              }
+            }
+          },
+          {
+            "name": "period",
+            "type": "u16"
+          },
+          {
             "name": "selection",
             "type": "u8"
           },
@@ -829,6 +2399,10 @@
           {
             "name": "stat_b_key",
             "type": "u32"
+          },
+          {
+            "name": "has_stat_b",
+            "type": "bool"
           },
           {
             "name": "op_add",
@@ -847,8 +2421,29 @@
             "type": "i64"
           },
           {
+            "name": "entry_msg_hash",
+            "docs": [
+              "sha256 of the entry odds record's `MessageId`. Pins *which* quote was taken,",
+              "so `prove_entry` cannot substitute a different record sharing the same ts."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
             "name": "entry_prob_bps",
             "type": "u32"
+          },
+          {
+            "name": "ranked",
+            "docs": [
+              "True iff the predictor committed *before* the proven kickoff, in real",
+              "wall-clock. Unranked predictions still settle; they just don't score."
+            ],
+            "type": "bool"
           },
           {
             "name": "close_ts",
@@ -931,12 +2526,12 @@
             "type": "i64"
           },
           {
-            "name": "entry_prob_bps",
-            "type": "u32"
-          },
-          {
             "name": "entry_ts",
             "type": "i64"
+          },
+          {
+            "name": "ranked",
+            "type": "bool"
           }
         ]
       }
@@ -969,6 +2564,10 @@
           {
             "name": "close_prob_bps",
             "type": "u32"
+          },
+          {
+            "name": "ranked",
+            "type": "bool"
           }
         ]
       }
@@ -1072,6 +2671,30 @@
       }
     },
     {
+      "name": "StatFamily",
+      "docs": [
+        "Which stat family a market resolves against. Base keys per participant:",
+        "goals 1/2, yellows 3/4, reds 5/6, corners 7/8 (soccer)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Goals"
+          },
+          {
+            "name": "Yellows"
+          },
+          {
+            "name": "Reds"
+          },
+          {
+            "name": "Corners"
+          }
+        ]
+      }
+    },
+    {
       "name": "StatTerm",
       "type": {
         "kind": "struct",
@@ -1112,6 +2735,21 @@
       "name": "CONFIG_SEED",
       "type": "bytes",
       "value": "[99, 111, 110, 102, 105, 103]"
+    },
+    {
+      "name": "DUEL_SEED",
+      "type": "bytes",
+      "value": "[100, 117, 101, 108]"
+    },
+    {
+      "name": "DUEL_VAULT_SEED",
+      "type": "bytes",
+      "value": "[100, 117, 101, 108, 95, 118, 97, 117, 108, 116]"
+    },
+    {
+      "name": "FIXTURE_SEED",
+      "type": "bytes",
+      "value": "[102, 105, 120, 116, 117, 114, 101]"
     },
     {
       "name": "PREDICTION_SEED",

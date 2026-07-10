@@ -1,19 +1,52 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { useFeed } from '../state/feed'
+import { useAuth } from '../state/auth'
 import Icon from './Icon'
 
 const NAV: { to: string; label: string; prefix?: string }[] = [
   { to: '/matches', label: 'Matches', prefix: '/match' },
+  { to: '/duels', label: 'Duels' },
   { to: '/portfolio', label: 'Portfolio' },
   { to: '/leaderboard', label: 'Leaderboard' },
 ]
+
+const SPEEDS = [1, 10, 30, 60]
+
+/**
+ * LIVE ingests the SSE stream. REPLAY re-emits a finished fixture's archived
+ * records on an accelerated clock — the only way to demonstrate ingestion once
+ * the tournament is over. Both paths carry real, provable records.
+ */
+function FeedToggle() {
+  const { mode, speed, setMode, setSpeed } = useFeed()
+  return (
+    <div className="hidden sm:flex items-center gap-1 rounded-xl bg-[#F8F7F5] p-1">
+      {(['live', 'replay'] as const).map((m) => (
+        <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m}
+          className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-colors ${
+            mode === m ? 'bg-white text-[#1E3A5F] shadow-sm' : 'text-slate-400 hover:text-[#1E3A5F]'}`}>
+          {m === 'live' && <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 align-middle ${mode === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />}
+          {m}
+        </button>
+      ))}
+      {mode === 'replay' && (
+        <select aria-label="Replay speed" value={speed} onChange={(e) => setSpeed(Number(e.target.value))}
+          className="bg-transparent text-[11px] font-bold text-[#1E3A5F] pr-1 focus:outline-none">
+          {SPEEDS.map((s) => <option key={s} value={s}>{s}×</option>)}
+        </select>
+      )}
+    </div>
+  )
+}
 
 const ring = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2'
 
 export default function Nav() {
   const loc = useLocation()
   const [open, setOpen] = useState(false)
+  const { ready } = useAuth()
   useEffect(() => { setOpen(false) }, [loc.pathname])
 
   const isActive = (to: string, prefix?: string) => (prefix ? loc.pathname.startsWith(prefix) : loc.pathname === to)
@@ -46,6 +79,12 @@ export default function Nav() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
+          <FeedToggle />
+          {!ready && (
+            <Link to="/onboard" className={`hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#FF6B35] hover:underline px-2 rounded ${ring}`}>
+              <Icon icon="lucide:key-round" className="text-[13px]" aria-hidden /> Get data access
+            </Link>
+          )}
           <WalletMultiButton />
           <button
             type="button"

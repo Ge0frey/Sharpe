@@ -3,11 +3,14 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import DataGate from './components/DataGate'
 import Landing from './pages/Landing'
+import Onboard from './pages/Onboard'
 import Matches from './pages/Matches'
 import MatchDetail from './pages/MatchDetail'
 import Portfolio from './pages/Portfolio'
 import Leaderboard from './pages/Leaderboard'
+import Duels from './pages/Duels'
 
 /** Constrained column for the in-app screens. The landing is full-bleed and opts out. */
 function Shell({ children }: { children: ReactNode }) {
@@ -21,8 +24,10 @@ export default function App() {
       <Nav />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/matches" element={<Shell><Matches /></Shell>} />
-        <Route path="/match/:id" element={<Shell><MatchDetail /></Shell>} />
+        <Route path="/onboard" element={<Shell><Onboard /></Shell>} />
+        <Route path="/matches" element={<Shell><DataGate><Matches /></DataGate></Shell>} />
+        <Route path="/match/:id" element={<Shell><DataGate><MatchDetail /></DataGate></Shell>} />
+        <Route path="/duels" element={<Shell><DataGate><Duels /></DataGate></Shell>} />
         <Route path="/portfolio" element={<Shell><Portfolio /></Shell>} />
         <Route path="/leaderboard" element={<Shell><Leaderboard /></Shell>} />
         <Route path="*" element={<Navigate to="/" replace />} />
