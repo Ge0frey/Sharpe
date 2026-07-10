@@ -338,5 +338,167 @@ Proven via `scripts/proof-spike.ts` (onboard → both proofs `true`). Locked fac
 - **Odds shapes:** `/api/odds/snapshot/{id}` is **live-only** (empty post-match); use **`?asOf=<pre-kickoff ms>`** for history (returned 34 offers at −30m). **Full-match 1X2** = `SuperOddsType:"1X2_PARTICIPANT_RESULT"`, **`MarketPeriod: null`** (a `"half=1"` variant is first-half), `PriceNames:["part1","draw","part2"]`, `Prices` decimal×1000 (`1889` = 1.889). Snapshot also carries `Pct` (de-vigged) — but prove the record from `/odds/validation` (its `odds` omits `Pct`, matching the program type). Other markets present: `ASIANHANDICAP_PARTICIPANT_GOALS`, `OVERUNDER_PARTICIPANT_GOALS` (each `half=1` + `null`).
 - **Tooling:** anchor JS **0.32.1**, web3 1.98.4. `BN` interop under Node ESM: `anchor.BN ?? anchor.default.BN`. Run scripts with `node --experimental-strip-types` (avoid TS enums/param-props). npm installs must run **unsandboxed** here (sandbox throttles npm's connection storm).
 
+---
+
+## 13. PHASE 0 SPIKES — all green (2026-07-09, `scripts/spike-phase0.ts`)
+
+No cut line was triggered. Every v2 feature survives.
+
+**S1 · Stat coverage is total.** On `18172379` (USA 2–0 Bosnia), `stat-validation` at `seq=1058` proves *every* family we want:
+
+| keys | stat | value |
+|---|---|---|
+| 1 / 2 | full goals | 2 – 0 |
+| 3 / 4 | yellows | 0 – 1 |
+| 5 / 6 | reds | 1 – 0 |
+| 7 / 8 | corners | 4 – 3 |
+| 1001 / 1002 | H1 goals | 1 – 0 |
+| 2001 / 2002 | H2 goals | 1 – 0 |
+| 1007 / 1008 | H1 corners | 3 – 2 |
+
+Corners total = 7, so `combined corners > 6` settles TRUE and `> 10` settles FALSE — both sides of a duel are demoable on one fixture. Note `ScoreStat.period` is **always 0**; the period lives in the key, not the field.
+
+**S2 · `validate_fixture` verifies.** Returns `true` at **131k CU**.
+- Roots PDA: `["ten_daily_fixtures_roots", alignedEpochDay u16 LE]`, `aligned = floor(epochDay/10)*10`.
+- `epochDay` derives from **`snapshot.Ts`** (the update time), *not* `StartTime`. For `18172379`: `Ts=1783173600000` → day 20638 → aligned 20630.
+- **Two ids.** `snapshot.FixtureId = 844424948304347` (internal) ≠ `summary.fixtureId = 18172379` (the id odds/scores use). Bind `FixtureFacts` on **`summary.fixture_id`**; read `start_time` from `snapshot.start_time`. The proof links them, so both are trustworthy.
+- `subTreeProof` is empty (`Nil`, `updateCount = 1`); `mainTreeProof` has 7 nodes.
+- `summary.updateSubTreeRoot` arrives as a **JSON byte array**, not base64 — unlike the odds/scores summaries. `codec.ts` must branch.
+
+**S3 · Devnet USDT `ELWT…` is owned by classic SPL Token**, not Token-2022 (TxL is Token-2022; do not conflate). Use `TokenInterface`/`InterfaceAccount` anyway. `faucet_tracker` PDA does not exist yet for our wallet; our USDT ATA is unfunded.
+
+**S4 · `/api/odds/updates/{epochDay}/{hourOfDay}/{interval}?fixtureId=` is a rich replay ladder.** 1,954 records across five 5-min buckets pre-kickoff, density rising into the whistle (30 at T−120m → 852 at T−5m). This replaces the 19 sequential `asOf` calls in `domain.ts:38-49`.
+
+**S5 · SSE is alive.** `/api/odds/stream` emits; `?fixtureId=` filters correctly; heartbeats every **~20 s** (a 15 s probe sees none — don't conclude "idle"). `Last-Event-ID` format is `"<epochMs>:<index>"`. `/api/scores/stream` holds open with heartbeats and no data when nothing is in play.
+
+**S6 · The vendored IDL is trimmed to the two verifiers.** `subscribe`, `request_devnet_faucet`, `validate_fixture`, and 23 others are absent. `scripts/proof-spike.ts:92` calls `program.methods.subscribe` and only survives because `ensureOnboarded()` short-circuits on a cached token. The full 28-instruction IDL is now extracted from `DOCUMENTATION/solana-programs.md:145-3319` to **`idls/txoracle-full.json`** — use it for `subscribe` / `request_devnet_faucet` / `validate_fixture`. Keep the trimmed IDL for `declare_program!`. `pricing_matrix` exists (62 bytes).
+
+### 13.1 The finding that reshapes the schedule
+
+`/api/fixtures/snapshot` is **forward-looking** — it no longer returns `18172379`. Resolve finished fixtures via `/api/fixtures/validation?fixtureId=` (which returns metadata *and* proves it). As of 2026-07-09 it lists four real World Cup matches before the deadline:
+
+| fixture | kickoff (UTC) | match |
+|---|---|---|
+| `18209181` | 2026-07-09 20:00 | France v Morocco |
+| `18218149` | 2026-07-10 19:00 | Spain v Belgium |
+| `18213979` | 2026-07-11 21:00 | Norway v England |
+| `18222446` | 2026-07-12 01:00 | Argentina v Switzerland |
+
+Odds appear roughly **24 h before kickoff** — France v Morocco is already quoting (France 61.8 / draw 23.9 / Morocco 14.3, `InRunning: false`); Spain v Belgium is not yet.
+
+Therefore **`ranked` is `Clock::now < proven_start_time`** — you committed before kickoff in real wall-clock, and the chain checked the kickoff against a Merkle root. No `MAX_ENTRY_AGE_SECS` constant, nothing to tune, nothing to fake. Finished fixtures yield `ranked = false` → **BACKTEST**; these four yield genuinely ranked entries.
+
+**Hard deadline:** ship Phase 2 before a real kickoff to land ranked predictions on live matches and settle them before 19 Jul. Spain v Belgium (10 Jul 19:00 UTC) is the realistic first target; Norway v England and Argentina v Switzerland are the backups.
+
+---
+
+## 14. PROGRAM v2 — shipped & deployed (2026-07-09)
+
+Program `734ZWmPmAMGSjCshLCJQRpPNiaWBQsdaZDkvP3MAGmLz` on devnet. Instruction set:
+
+```
+initialize_config
+prove_fixture     CPI validate_fixture  →  FixtureFacts PDA ["fixture", fixture_id le]
+open_prediction   no CPI                →  the commitment
+prove_entry       CPI validate_odds     →  entry_prob_bps
+settle_close      CPI validate_odds     →  clv_bps
+settle_outcome    CPI validate_stat     →  outcome_win
+void_prediction   no CPI                →  rent reclaim
+```
+
+### 14.1 Why the entry proof is deferred (this was not optional)
+
+v1 merged the entry proof into `open_prediction`. Two independent reasons that cannot work:
+
+1. **The root does not exist yet.** Odds roots publish in 5-minute batches. The quote you take at commitment time is not covered by any posted root. Observed live: `prove_entry` on the France v Morocco entry returned `HTTP 404` from `/api/odds/validation` on the first attempt and succeeded ~60 s later. A merged instruction can therefore *never* open a prediction on a match that has not started — i.e. it can only ever produce backtests, which are exactly the predictions that don't score.
+2. **Transaction size.** `Odds` + both proof vectors + 7 accounts came to ~1660 encoded bytes against a 1644 limit once `fixture_facts` was added. Split, `open_prediction` carries 5 accounts and no proof; `prove_entry` carries 4.
+
+The commitment now pins `entry_ts` **and** `entry_msg_hash` (sha256 of the quote's `MessageId`), so a deferred proof has no freedom: only the exact quote taken can satisfy both, and `bind_odds` insists that quote prices the market that was bet. `prove_entry` is permissionless — a keeper may land it.
+
+### 14.2 `ranked` — commitment, not freshness
+
+`ranked = Clock::now < FixtureFacts.start_time`, evaluated in `open_prediction`. Did the predictor commit before a kickoff the chain itself verified? No tunable constant, nothing to fake. Finished fixtures yield `ranked = false` → **BACKTEST**, excluded from the leaderboard but still settled.
+
+Units footgun: `Fixture.start_time` and `Odds.ts` are epoch **milliseconds**; `Clock::unix_timestamp` is **seconds**. See `open_prediction::now_ms`.
+
+### 14.3 Guards, each observed rejecting on devnet
+
+A Merkle proof says a record is *authentic*. It says nothing about *which market* the record prices. `market.rs::bind_odds` closes that gap.
+
+| guard | error | what it stops |
+|---|---|---|
+| `super_odds_type` matches market | `MarketTypeMismatch` | a totals record settling a 1X2 bet |
+| `market_period` matches period | `MarketPeriodMismatch` | **an authentic `half=1` line settling a full-match bet** |
+| `market_parameters` line == `line_x10` | `LineMismatch` | an Over 3.5 quote settling an Over 2.5 bet |
+| `price_names[i]` names the selection | `PriceNameMismatch` | reading "draw" as "home" |
+| quarter/whole lines refused | `UnsupportedLine` | `line=0.75` — a split stake has no boolean answer |
+| `entry_ts < start_time` | `EntryAfterKickoff` | a line quoted once the result was half known |
+| `close_ts <= start_time`, `!in_running` | `CloseAfterKickoff`, `LineIsInPlay` | an in-play "closing" line |
+| `sha256(message_id) == entry_msg_hash` | `EntryRecordMismatch` | proving a different quote than the one taken |
+
+Verified end-to-end by `scripts/settle-e2e.ts` (positive path + all eight rejections) on fixture 18172379.
+
+### 14.4 `prob_bps` rounds, it does not truncate
+
+`10_000_000 / 1889` is `5293.8`. The program truncated to `5293`; `app/src/lib/domain.ts` uses `Math.round` → `5294`. The Verify modal would have displayed a probability the chain never stored. Now `(10_000_000 + price/2) / price`, checked against the frontend's formula for every price 1.001–10.000 in `programs/clv/tests/market.rs`.
+
+### 14.5 Markets
+
+| market | stats | priced? | surface |
+|---|---|---|---|
+| `Result1x2` | (P1 − P2) goals vs 0 | yes, `1X2_PARTICIPANT_RESULT` | ranked CLV |
+| `TotalsOu` | (P1 + P2) goals vs line | yes, `OVERUNDER_PARTICIPANT_GOALS` | ranked CLV |
+| `CombinedTotal` | (A + B) any family vs line | no | duels |
+| `TeamTotal` | single stat vs line | no | duels |
+
+Families: `Goals` 1/2, `Yellows` 3/4, `Reds` 5/6, `Corners` 7/8. Key = `period*1000 + base`. Only `Result1x2`/`TotalsOu` may back a `Prediction`; the rest are `MarketHasNoOddsLine` there and belong to duels, which need no line.
+
+### 14.6 Live ranked predictions (settle before 19 Jul)
+
+| fixture | prediction | entry | status |
+|---|---|---|---|
+| `18209181` France v Morocco | Home @ 1.621 | 6169 bps, committed T−15.6h | ranked, entry proven — **settle after 2026-07-09 20:00 UTC** |
+
+Devnet artifact: five 121-byte `Prediction` accounts predate the v2 layout. They share the discriminator but not the shape, so `program.account.prediction.all()` throws on them — `listPredictions` must skip undecodable accounts.
+
+---
+
+## 15. PROP DUELS — shipped (2026-07-09)
+
+`Duel` PDA `["duel", fixture_id le, duel_id le]` + vault PDA token account `["duel_vault", duel]`, authority = the duel PDA.
+
+```
+create_duel   escrow creator stake; terms via the shared derive_terms; expires_at = PROVEN kickoff
+join_duel     escrow taker stake                                       (refused past expires_at)
+resolve_duel  CPI validate_stat -> outcome_true. Permissionless, moves no funds.
+claim_duel    pay 2x stake to the proven winner, close the vault. Permissionless.
+cancel_duel   unmatched -> refund creator
+refund_duel   matched but never provable, past kickoff + 7d -> refund both
+```
+
+Resolution and payout are split for the same reason `prove_entry` is split from `open_prediction`: one verifier CPI per transaction, and a legible state machine (`Resolved` = the chain knows; `Settled` = the money moved).
+
+- **Stake:** devnet USDT `ELWT…`, a **classic SPL Token** mint (TxL is Token-2022 and is data-auth only — never staked). The vault is declared over `TokenInterface`, so a Token-2022 stake mint would work unchanged.
+- **`anchor-spl` cost:** default features add ~140 KB of `.so` (metadata, ATA, token-2022 extensions). Trimmed to `["token","token_2022","mint"]`. `token_2022` cannot be dropped — Anchor's `token::` account constraints expand to `anchor_spl::token_interface`. The program account needed `solana program extend` twice.
+- **Faucet:** `request_devnet_faucet` seeds are `["faucet_tracker", user]`; treasury is `["usdt_treasury"]`. Neither is declared in the IDL. Mints 100 USDT.
+- **Testability note:** `create_duel` requires `now < start_time`, so a duel cannot be created on a finished fixture — which means `resolve_duel`/`claim_duel` cannot be exercised on historical data. The payout rule is therefore extracted as the pure `creator_wins(outcome_true, creator_takes_true)` and unit-tested; the full path runs against a real match.
+
+**Live duel:** `8zyy8HPuqtFdtjQJkqdN8pkxB5FShUAhTEtPvP4KHVW2` — France v Morocco, combined corners over 10.5, 5 USDT/side, matched. Resolves after full time.
+
+## 16. FRONTEND v2
+
+- `app/src/feed/{index,live,replay}.ts` — one `FeedSource`, two implementations. Live SSE (fixture-filtered, `Last-Event-ID` resume, backoff, dedupe by `MessageId`/`Seq`); replay from the `/odds/updates/{day}/{hour}/{interval}` ladder on an accelerated clock. `Nav` carries the `LIVE | REPLAY ▸ n×` toggle.
+- `app/src/lib/auth.ts` + `state/auth.tsx` + `pages/Onboard.tsx` — per-wallet guest JWT → `subscribe(1,4)` → `signMessage` → `activate` (**`text/plain`**). Cached in `localStorage`. `DataGate` fronts every page that needs credentials.
+- **Secret leak fixed.** `config.ts` did `const env = import.meta.env`, which makes Vite inline the *entire* env object — the JWT and api token were being baked into `dist/`. Reading each key by name limits inlining. `scripts/.state.json` was also tracked in git; now ignored. **The token remains in git history (commit `00c1ba9`) — rotate before publishing.**
+- `pages/Duels.tsx` — offer/take/resolve/claim, with the half-integer line rule surfaced in the form.
+- Portfolio gains `Prove entry`, the **Backtest** badge, and `void_prediction`. Leaderboard filters to `ranked` and adds hit rate + Brier.
+- `app/src/chain/idl/txoracle-full.json` — the UI needs `validate_fixture`, `subscribe` and `request_devnet_faucet`, none of which are in the trimmed IDL.
+
+**Tests:** `cargo test -p clv` (22) · `cd app && npm test` (16 golden-vector codec tests) · `scripts/settle-e2e.ts` (positive + 7 negative guards) · `scripts/duel-e2e.ts`.
+
+**Docs** (all under `docs/`): `USER-FLOW.md` (the end-to-end walkthrough), `SUBMISSION.md` (technical overview + endpoint list), `FEEDBACK.md` (the required API-experience field), `DEMO.md` (video script).
+
+---
+
 ### TL;DR
 Build a small `clv` Anchor program that stores a **Prediction** and settles it through **CPIs into txoracle's `validate_odds` (entry + close) and `validate_stat` (result)** via `declare_program!`, one verifier per instruction for CU headroom. Off-chain is three clean layers (typed API clients → pure CLV/predicate domain → chain), a **Replayer** so the demo runs on finished-match data, and a React UI whose centerpiece is a **Verify modal** proving every number on Solana. **Do the M0 proof spike on a real finished World Cup fixture before writing any settlement code** — the whole edge (and the whole risk) lives in getting those two Merkle proofs to return `true`.

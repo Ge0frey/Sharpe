@@ -14,14 +14,31 @@ export default function Leaderboard() {
   const me = connected ? wallet!.publicKey.toBase58() : null
   const { data: preds = [], isLoading } = useQuery({ queryKey: ['predictions'], queryFn: () => listPredictions(clv) })
 
-  const byUser = new Map<string, { cum: number; n: number; closed: number; settled: number; wins: number }>()
-  for (const p of preds) {
+  // Only RANKED predictions count. `ranked` is written on-chain as
+  // `Clock::now < proven_kickoff`, so a backtest on a finished match — where the
+  // closing line and the result are already public — can never enter the ranking.
+  const ranked = preds.filter((p: any) => p.ranked)
+  const backtests = preds.length - ranked.length
+
+  type Agg = { cum: number; n: number; closed: number; settled: number; wins: number; brier: number; absClv: number }
+  const byUser = new Map<string, Agg>()
+  for (const p of ranked) {
     const k = p.predictor.toBase58()
-    const e = byUser.get(k) ?? { cum: 0, n: 0, closed: 0, settled: 0, wins: 0 }
+    const e = byUser.get(k) ?? { cum: 0, n: 0, closed: 0, settled: 0, wins: 0, brier: 0, absClv: 0 }
     e.n++
     const st = Object.keys(p.status ?? {})[0]
-    if (st === 'closed' || st === 'settled') { e.cum += Number(p.clvBps); e.closed++ }
-    if (st === 'settled') { e.settled++; if (p.outcomeWin) e.wins++ }
+    if (st === 'closed' || st === 'settled') {
+      e.cum += Number(p.clvBps)
+      e.absClv += Math.abs(Number(p.clvBps))
+      e.closed++
+    }
+    if (st === 'settled') {
+      e.settled++
+      if (p.outcomeWin) e.wins++
+      // Brier: squared error of the entry probability against the realised outcome.
+      const prob = Number(p.entryProbBps) / 10_000
+      e.brier += (prob - (p.outcomeWin ? 1 : 0)) ** 2
+    }
     byUser.set(k, e)
   }
   const rows = [...byUser.entries()].map(([k, v]) => ({ k, ...v })).sort((a, b) => b.cum - a.cum)
@@ -48,6 +65,11 @@ export default function Leaderboard() {
               CLV measures your edge against the market — the gap between the line you locked and the final closing price.
               Every number here is Merkle-proven on Solana, so the ranking is trustless.
             </p>
+            <p className="text-sm text-slate-400 leading-relaxed mt-2">
+              Ranked calls only: the program marks a prediction <span className="font-num text-[#1E3A5F]">ranked</span> just when it was
+              committed before a kickoff proven by <span className="font-num text-[#1E3A5F]">validate_fixture</span>. You cannot bet a match
+              whose result you already know.{backtests > 0 && ` ${backtests} backtest${backtests === 1 ? '' : 's'} excluded.`}
+            </p>
           </div>
         </div>
       </div>
@@ -56,7 +78,7 @@ export default function Leaderboard() {
       {!isLoading && rows.length === 0 && (
         <div className="soft-card rounded-2xl p-12 text-center">
           <Icon icon="lucide:trophy" className="text-4xl text-slate-300" />
-          <p className="text-slate-400 mt-3">No settled calls yet.</p>
+          <p className="text-slate-400 mt-3">No ranked calls yet — a prediction must be committed before kickoff to score.</p>
         </div>
       )}
 
@@ -91,9 +113,11 @@ export default function Leaderboard() {
           <div className="px-5 py-3 grid grid-cols-12 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             <div className="col-span-2 md:col-span-1">Rank</div>
             <div className="col-span-6 md:col-span-4">Predictor</div>
-            <div className="hidden md:block md:col-span-4">Edge</div>
-            <div className="col-span-2 text-center">Calls</div>
-            <div className="col-span-2 text-right">CLV</div>
+            <div className="hidden md:block md:col-span-3">Edge</div>
+            <div className="col-span-1 text-center">Calls</div>
+            <div className="hidden md:block md:col-span-1 text-center">Hit</div>
+            <div className="hidden md:block md:col-span-1 text-center">Brier</div>
+            <div className="col-span-3 md:col-span-2 text-right">CLV</div>
           </div>
           <div className="flex flex-col gap-2.5">
             {rows.map((r, i) => {
@@ -108,14 +132,20 @@ export default function Leaderboard() {
                   <span className="font-num font-bold text-sm text-[#1E3A5F]">{short(r.k)}</span>
                   {isMe && <Badge tone="amber">You</Badge>}
                 </div>
-                <div className="hidden md:block md:col-span-4 pr-6">
+                <div className="hidden md:block md:col-span-3 pr-6">
                   <div className="relative h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                     <div className="absolute top-0 bottom-0 left-0 meter-fill rounded-full"
                       style={{ width: `${(Math.abs(r.cum) / maxAbs) * 100}%`, background: r.cum >= 0 ? 'var(--ok)' : 'var(--bad)' }} />
                   </div>
                 </div>
-                <div className="col-span-2 text-center font-num font-bold text-slate-500">{r.n}</div>
-                <div className="col-span-2 text-right font-display font-bold">
+                <div className="col-span-1 text-center font-num font-bold text-slate-500">{r.n}</div>
+                <div className="hidden md:block md:col-span-1 text-center font-num text-sm text-slate-500">
+                  {r.settled ? `${Math.round((r.wins / r.settled) * 100)}%` : '—'}
+                </div>
+                <div className="hidden md:block md:col-span-1 text-center font-num text-sm text-slate-500" title="Brier score — lower is better">
+                  {r.settled ? (r.brier / r.settled).toFixed(3) : '—'}
+                </div>
+                <div className="col-span-3 md:col-span-2 text-right font-display font-bold">
                   {r.closed ? <CLV bps={r.cum} /> : <span className="text-slate-300">—</span>}
                 </div>
               </div>

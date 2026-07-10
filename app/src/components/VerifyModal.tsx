@@ -2,19 +2,30 @@ import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useClv } from '../state/useClv'
 import { txline } from '../lib/txline'
-import { pickOdds, finalResult, MARKETS, probPct } from '../lib/domain'
-import { verifyOdds, verifyStat } from '../chain/actions'
+import { pickOddsFor, finalStat, marketFromAccount, probPct } from '../lib/domain'
+import { verifyFixture, verifyOdds, verifyStat } from '../chain/actions'
 import { Badge, Shield } from './ui'
 import Icon from './Icon'
 import Flag from './Flag'
 import { CountUp } from './motion'
 
-const trunc = (arr: number[]) => arr ? '0x' + Buffer.from(arr.slice(0, 6)).toString('hex') + '…' : ''
+/**
+ * Roots arrive base64 from /odds and /scores but as a JSON byte array from
+ * /fixtures. Decode both, or the fixtures root renders as the hex of its own
+ * base64 characters.
+ */
+const trunc = (root: number[] | string | undefined) => {
+  if (!root) return ''
+  const b = Array.isArray(root) ? Buffer.from(root) : Buffer.from(root, 'base64')
+  return '0x' + b.subarray(0, 6).toString('hex') + '…'
+}
 
 export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fixture: any; onClose: () => void }) {
   const { txo } = useClv()
   const fixtureId = Number(pred.fixtureId)
-  const market = MARKETS[pred.selection]
+  // Rebuilt from market + period + selection + line, never from `selection` alone:
+  // that would mislabel every Totals bet and look up the wrong odds record.
+  const market = marketFromAccount(pred)
   const panelRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -34,26 +45,36 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
     return () => { document.removeEventListener('keydown', onKey); trigger?.focus?.() }
   }, [onClose])
 
+  // The fixture proof is not decoration: `entry_ts < start_time`, `close_ts <= start_time`
+  // and `ranked` are all measured against the kickoff this proof commits.
+  const fixtureProof = useQuery({
+    queryKey: ['verify-fixture', fixtureId], retry: 0, queryFn: async () => {
+      const val: any = await txline.fixtureValidation(fixtureId)
+      return { ok: await verifyFixture(txo, val), start: Number(val.snapshot.StartTime), root: val.summary.updateSubTreeRoot }
+    },
+  })
   const entry = useQuery({
     queryKey: ['verify-entry', pred.pubkey], retry: 0, queryFn: async () => {
-      const rec = await pickOdds(fixtureId, Number(pred.entryTs))
+      const rec = await pickOddsFor(fixtureId, Number(pred.entryTs), market)
       if (!rec) throw new Error('entry record not found')
       const val = await txline.oddsValidation(rec.MessageId, rec.Ts)
-      return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[pred.selection]), root: val.summary.oddsSubTreeRoot }
+      return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[market.priceIndex]), root: val.summary.oddsSubTreeRoot }
     },
   })
   const close = useQuery({
     queryKey: ['verify-close', pred.pubkey], enabled: !!pred.closeTs && Number(pred.closeTs) > 0, retry: 0, queryFn: async () => {
-      const rec = await pickOdds(fixtureId, Number(pred.closeTs))
+      const rec = await pickOddsFor(fixtureId, Number(pred.closeTs), market)
       if (!rec) throw new Error('closing record not found')
       const val = await txline.oddsValidation(rec.MessageId, rec.Ts)
-      return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[pred.selection]), root: val.summary.oddsSubTreeRoot }
+      return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[market.priceIndex]), root: val.summary.oddsSubTreeRoot }
     },
   })
   const outcome = useQuery({
     queryKey: ['verify-outcome', pred.pubkey], retry: 0, queryFn: async () => {
-      const { val, p1, p2 } = await finalResult(fixtureId)
-      return { ok: await verifyStat(txo, val, market), p1, p2, root: val.summary.eventStatsSubTreeRoot }
+      // The stat keys the CHAIN settled on. A first-half bet is keys 1001/1002;
+      // proving keys 1/2 would re-prove a different match period entirely.
+      const { val, a, b } = await finalStat(fixtureId, pred.statAKey, pred.hasStatB ? pred.statBKey : undefined)
+      return { ok: await verifyStat(txo, val, pred), p1: a, p2: b, root: val.summary.eventStatsSubTreeRoot }
     },
   })
 
@@ -100,15 +121,17 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
             ) : (
               <span>Fixture {fixtureId}</span>
             )}
-            <span>· {['Home win', 'Draw', 'Away win'][pred.selection]} · re-proved live on Solana</span>
+            <span>· {market.label} · re-proved live on Solana</span>
           </p>
         </div>
 
         {/* Proof rows */}
         <div className="p-6 space-y-3">
-          <Row n="01" title="Entry line" sub="validate_odds" q={entry} delay={40} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
-          <Row n="02" title="Closing line" sub="validate_odds" q={close} delay={120} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
-          <Row n="03" title="Match result" sub="validate_stat" q={outcome} delay={200} render={(d) => <>{d.p1}–{d.p2} · scores root {trunc(d.root)}</>} />
+          <Row n="01" title="The fixture" sub="validate_fixture" q={fixtureProof} delay={40} render={(d) => <>kickoff {new Date(d.start).toUTCString()} · fixtures root {trunc(d.root)}</>} />
+          <Row n="02" title="Entry line" sub="validate_odds" q={entry} delay={120} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
+          <Row n="03" title="Closing line" sub="validate_odds" q={close} delay={200} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
+          <Row n="04" title="Match result" sub="validate_stat" q={outcome} delay={280}
+            render={(d) => <>keys {pred.statAKey}{pred.hasStatB ? `/${pred.statBKey}` : ''} = {d.p1}{d.p2 !== undefined ? `–${d.p2}` : ''} · scores root {trunc(d.root)}</>} />
         </div>
 
         {/* Footer */}

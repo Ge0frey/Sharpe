@@ -1,11 +1,20 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::{CONFIG_SEED, PREDICTION_SEED};
+use crate::constants::{CONFIG_SEED, FIXTURE_SEED, PREDICTION_SEED};
 use crate::error::ClvError;
-use crate::market::{derive_terms, prob_bps};
-use crate::state::{Config, MarketKind, PredStatus, Prediction, PredictionOpened};
-use crate::txoracle::program::Txoracle;
-use crate::txoracle::types::{Odds, OddsBatchSummary, ProofNode};
+use crate::market::{derive_terms, is_priced_market};
+use crate::state::{
+    Config, FixtureFacts, MarketKind, PredStatus, Prediction, PredictionOpened, StatFamily,
+};
+
+/// TxLINE timestamps (`Fixture.start_time`, `Odds.ts`) are epoch **milliseconds**;
+/// `Clock::unix_timestamp` is epoch **seconds**. Every comparison below is in ms.
+pub fn now_ms() -> Result<i64> {
+    Clock::get()?
+        .unix_timestamp
+        .checked_mul(1000)
+        .ok_or(error!(ClvError::Overflow))
+}
 
 #[derive(Accounts)]
 #[instruction(id: u64)]
@@ -15,6 +24,11 @@ pub struct OpenPrediction<'info> {
     #[account(mut, seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Account<'info, Config>,
     #[account(
+        seeds = [FIXTURE_SEED, &fixture_facts.fixture_id.to_le_bytes()],
+        bump = fixture_facts.bump
+    )]
+    pub fixture_facts: Account<'info, FixtureFacts>,
+    #[account(
         init,
         payer = predictor,
         space = 8 + Prediction::INIT_SPACE,
@@ -22,44 +36,46 @@ pub struct OpenPrediction<'info> {
         bump
     )]
     pub prediction: Account<'info, Prediction>,
-    /// CHECK: The daily odds Merkle roots PDA; validated inside txoracle by its seeds/owner.
-    pub daily_odds_merkle_roots: UncheckedAccount<'info>,
-    pub txoracle_program: Program<'info, Txoracle>,
     pub system_program: Program<'info, System>,
 }
 
-/// Open a prediction and prove the entry line is authentic (CPI validate_odds).
+/// Commit to a call. No proof, no CPI — this is the moment of *commitment*, and it
+/// must be cheap and always available.
+///
+/// The entry line is proven separately by `prove_entry`, because the odds Merkle
+/// root covering the quote you just took is not published until the next 5-minute
+/// batch. Proving at open would therefore make it impossible to open a prediction
+/// on a match that has not started — which is the only kind of prediction that
+/// counts.
+///
+/// Two things are fixed here and never revisited:
+///   * `entry_ts < start_time` — a line quoted after the proven kickoff is not a call;
+///   * `ranked = now < start_time` — did the predictor commit before kickoff, in real
+///     wall-clock? Replayed and backtested predictions still settle, but do not score.
 #[allow(clippy::too_many_arguments)]
 pub fn handler(
     ctx: Context<OpenPrediction>,
     id: u64,
     fixture_id: i64,
     market: MarketKind,
+    family: StatFamily,
+    period: u16,
     selection: u8,
     line_x10: i16,
-    price_index: u8,
     entry_ts: i64,
-    odds: Odds,
-    summary: OddsBatchSummary,
-    sub_tree_proof: Vec<ProofNode>,
-    main_tree_proof: Vec<ProofNode>,
+    entry_msg_hash: [u8; 32],
 ) -> Result<()> {
-    // Bind the supplied odds record to this prediction before proving it.
-    require!(odds.fixture_id == fixture_id, ClvError::FixtureMismatch);
-    require!(odds.ts == entry_ts, ClvError::TimestampMismatch);
-    let idx = price_index as usize;
-    require!(idx < odds.prices.len(), ClvError::InvalidPriceIndex);
-    let price = odds.prices[idx];
-    let terms = derive_terms(market, selection, line_x10)?;
+    let start_time = ctx.accounts.fixture_facts.start_time;
+    require!(ctx.accounts.fixture_facts.fixture_id == fixture_id, ClvError::FixtureMismatch);
+    // Only markets a consensus line prices can carry CLV; corners/cards live on duels.
+    require!(is_priced_market(market), ClvError::MarketHasNoOddsLine);
+    require!(entry_ts < start_time, ClvError::EntryAfterKickoff);
 
-    // Prove the entry line against the on-chain odds Merkle root.
-    let txp = ctx.accounts.txoracle_program.to_account_info();
-    let root = ctx.accounts.daily_odds_merkle_roots.to_account_info();
-    let ok = crate::cpi::validate_odds(&txp, &root, entry_ts, &odds, &summary, &sub_tree_proof, &main_tree_proof)?;
-    require!(ok, ClvError::OddsProofRejected);
+    // Validates the (market, selection, line, period, family) combination and fixes
+    // the settlement predicate for good.
+    let terms = derive_terms(market, selection, line_x10, period, family)?;
 
-    let entry_prob_bps = prob_bps(price)?;
-    let now = Clock::get()?.unix_timestamp;
+    let now = now_ms()?;
     let bump = ctx.bumps.prediction;
 
     {
@@ -72,24 +88,29 @@ pub fn handler(
     p.id = id;
     p.fixture_id = fixture_id;
     p.market = market;
+    p.family = family;
+    p.period = period;
     p.selection = selection;
     p.line_x10 = line_x10;
     p.stat_a_key = terms.stat_a_key;
     p.stat_b_key = terms.stat_b_key;
+    p.has_stat_b = terms.has_stat_b;
     p.op_add = terms.op_add;
     p.comparison = terms.comparison;
     p.threshold = terms.threshold;
     p.entry_ts = entry_ts;
-    p.entry_prob_bps = entry_prob_bps;
+    p.entry_msg_hash = entry_msg_hash;
+    p.entry_prob_bps = 0;
+    p.ranked = now < start_time;
     p.close_ts = 0;
     p.close_prob_bps = 0;
     p.clv_bps = 0;
     p.outcome_win = false;
-    p.status = PredStatus::EntryProven;
+    p.status = PredStatus::Open;
     p.created_at = now;
     p.settled_at = 0;
     p.bump = bump;
 
-    emit!(PredictionOpened { predictor: p.predictor, id, fixture_id, entry_prob_bps, entry_ts });
+    emit!(PredictionOpened { predictor: p.predictor, id, fixture_id, entry_ts, ranked: p.ranked });
     Ok(())
 }

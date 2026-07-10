@@ -2,7 +2,8 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { txline } from '../lib/txline'
 import { DEMO_FIXTURE_META } from '../config'
-import { oddsTrajectory, finalResult } from '../lib/domain'
+import { oddsTrajectory, finalResult, probPct, isFinalised } from '../lib/domain'
+import { useFixtureFeed } from '../state/feed'
 import { Card } from '../components/ui'
 import Icon from '../components/Icon'
 import Flag from '../components/Flag'
@@ -24,6 +25,12 @@ export default function MatchDetail() {
   const { data: result } = useQuery({
     queryKey: ['result', fixtureId], enabled: !!fixture, retry: 0, queryFn: () => finalResult(fixtureId),
   })
+
+  // Ingest from whichever source is active: the SSE stream, or an accelerated
+  // replay of this fixture's archived records. Both carry provable records.
+  const { odds: liveOdds, scores: liveScores, mode } = useFixtureFeed(fixture ? fixtureId : null, start || null)
+  const latest = liveOdds.filter((o: any) => o.SuperOddsType === '1X2_PARTICIPANT_RESULT' && o.MarketPeriod == null).at(-1)
+  const finalised = isFinalised(liveScores)
 
   if (!fixture) {
     if (fixturesLoading) return (
@@ -98,7 +105,24 @@ export default function MatchDetail() {
                 <Legend swatch="#FF6B35" label="Away" />
               </div>
             </div>
-            <div className="text-xs text-slate-400 mb-4">TxLINE StablePrice 1X2, de-margined. This is the line you're proving against.</div>
+            <div className="text-xs text-slate-400 mb-3">TxLINE StablePrice 1X2, de-margined. This is the line you're proving against.</div>
+
+            {/* Ingest indicator — proves the feed is actually flowing. */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 px-3 py-2.5 rounded-xl bg-[#F8F7F5] text-xs">
+              <span className="inline-flex items-center gap-1.5 font-bold uppercase tracking-widest text-[10px] text-slate-400">
+                <span className={`w-1.5 h-1.5 rounded-full ${liveOdds.length ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                {mode} feed
+              </span>
+              <span className="text-slate-500 font-num">{liveOdds.length} odds · {liveScores.length} score updates</span>
+              {latest && (
+                <span className="text-slate-500 font-num">
+                  now <b className="text-[#1E3A5F]">{probPct(latest.Prices[0]).toFixed(1)}%</b> /
+                  <b className="text-[#1E3A5F]"> {probPct(latest.Prices[1]).toFixed(1)}%</b> /
+                  <b className="text-[#1E3A5F]"> {probPct(latest.Prices[2]).toFixed(1)}%</b>
+                </span>
+              )}
+              {finalised && <span className="text-emerald-600 font-bold">full time</span>}
+            </div>
             {trajLoading ? (
               <Skeleton className="h-72 w-full rounded-xl" />
             ) : traj.length === 0 ? (

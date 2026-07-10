@@ -9,11 +9,15 @@ use anchor_lang::solana_program::program::{get_return_data, invoke};
 
 use crate::error::ClvError;
 use crate::txoracle::types::{
-    BinaryExpression, Odds, OddsBatchSummary, ProofNode, ScoresBatchSummary, StatTerm, TraderPredicate,
+    BinaryExpression, Fixture, FixtureBatchSummary, Odds, OddsBatchSummary, ProofNode,
+    ScoresBatchSummary, StatTerm, TraderPredicate,
 };
 
 const VALIDATE_ODDS_DISC: [u8; 8] = [192, 19, 91, 138, 104, 100, 212, 86];
 const VALIDATE_STAT_DISC: [u8; 8] = [107, 197, 232, 90, 191, 136, 105, 185];
+// Present in txoracle but omitted from the trimmed IDL we vendor for
+// `declare_program!`; the types it needs (Fixture, FixtureBatchSummary) are there.
+const VALIDATE_FIXTURE_DISC: [u8; 8] = [231, 129, 218, 86, 223, 114, 21, 126];
 
 fn read_return_bool() -> bool {
     match get_return_data() {
@@ -50,6 +54,35 @@ pub fn validate_odds<'info>(
         data,
     };
     invoke(&ix, &[daily_odds_roots.clone(), txoracle_program.clone()])?;
+    Ok(read_return_bool())
+}
+
+/// CPI txoracle::validate_fixture. Returns true iff `snapshot` is committed under
+/// the ten-daily fixtures root, which makes `snapshot.start_time` a proven kickoff.
+pub fn validate_fixture<'info>(
+    txoracle_program: &AccountInfo<'info>,
+    ten_daily_fixtures_roots: &AccountInfo<'info>,
+    snapshot: &Fixture,
+    summary: &FixtureBatchSummary,
+    sub_tree_proof: &Vec<ProofNode>,
+    main_tree_proof: &Vec<ProofNode>,
+) -> Result<bool> {
+    let data = (|| -> std::io::Result<Vec<u8>> {
+        let mut d = VALIDATE_FIXTURE_DISC.to_vec();
+        snapshot.serialize(&mut d)?;
+        summary.serialize(&mut d)?;
+        sub_tree_proof.serialize(&mut d)?;
+        main_tree_proof.serialize(&mut d)?;
+        Ok(d)
+    })()
+    .map_err(|_| error!(ClvError::FixtureProofRejected))?;
+
+    let ix = Instruction {
+        program_id: *txoracle_program.key,
+        accounts: vec![AccountMeta::new_readonly(*ten_daily_fixtures_roots.key, false)],
+        data,
+    };
+    invoke(&ix, &[ten_daily_fixtures_roots.clone(), txoracle_program.clone()])?;
     Ok(read_return_bool())
 }
 

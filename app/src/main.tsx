@@ -1,6 +1,6 @@
-import { Buffer } from 'buffer'
-;(globalThis as any).Buffer = (globalThis as any).Buffer ?? Buffer
-;(globalThis as any).global = globalThis
+// Must stay first. Installs globalThis.Buffer before any @solana/* module is
+// evaluated — see src/polyfills.ts for why this cannot live in this file's body.
+import './polyfills'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
