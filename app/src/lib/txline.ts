@@ -8,7 +8,7 @@ const headers = () => {
 };
 
 async function get<T = any>(path: string, params?: Record<string, any>): Promise<T> {
-  const url = new URL(CFG.api + path);
+  const url = new URL(CFG.api + path, window.location.origin);
   if (params) for (const [k, v] of Object.entries(params)) if (v != null) url.searchParams.set(k, String(v));
   const r = await fetch(url.toString(), { headers: headers() });
   if (!r.ok) throw new Error(`${path} -> ${r.status}`);
@@ -66,7 +66,7 @@ async function streamSse(
   fixtureId?: number,
   lastEventId?: string,
 ): Promise<string | undefined> {
-  const url = new URL(CFG.api + path);
+  const url = new URL(CFG.api + path, window.location.origin);
   if (fixtureId) url.searchParams.set("fixtureId", String(fixtureId));
 
   const h: Record<string, string> = { ...headers(), Accept: "text/event-stream", "Cache-Control": "no-cache" };

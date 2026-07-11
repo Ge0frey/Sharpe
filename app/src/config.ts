@@ -1,7 +1,9 @@
 // Read each key by name. `const env = import.meta.env` makes Vite inline the WHOLE
 // env object into the bundle — every VITE_* in .env.local, secrets included.
 export const CFG = {
-  api: (import.meta.env.VITE_TXLINE_API as string) ?? "https://txline-dev.txodds.com",
+  // Relative path proxied to txline-dev.txodds.com — see vite.config.ts (dev)
+  // and vercel.json (prod). Direct cross-origin calls are CORS-blocked.
+  api: (import.meta.env.VITE_TXLINE_API as string) ?? "/txapi",
   rpc: (import.meta.env.VITE_RPC_URL as string) ?? "https://api.devnet.solana.com",
   clvProgram: (import.meta.env.VITE_CLV_PROGRAM as string) ?? "734ZWmPmAMGSjCshLCJQRpPNiaWBQsdaZDkvP3MAGmLz",
   txoracle: (import.meta.env.VITE_TXORACLE_PROGRAM as string) ?? "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J",

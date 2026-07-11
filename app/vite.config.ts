@@ -27,4 +27,16 @@ export default defineConfig({
   define: {
     global: 'globalThis',
   },
+  server: {
+    // TxOdds' API sends no CORS headers, so the browser blocks direct calls.
+    // Proxy /txapi through the dev server (server-to-server, no CORS). SSE
+    // streams pass through fine. Mirrors the /txapi rewrite in vercel.json.
+    proxy: {
+      '/txapi': {
+        target: 'https://txline-dev.txodds.com',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/txapi/, ''),
+      },
+    },
+  },
 })
