@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useClv } from '../state/useClv'
 import { txline } from '../lib/txline'
-import { pickOddsFor, finalStat, marketFromAccount, probPct } from '../lib/domain'
+import { pickArchivedAt, finalStat, marketFromAccount, probPct } from '../lib/domain'
 import { verifyFixture, verifyOdds, verifyStat } from '../chain/actions'
 import { Badge, Shield } from './ui'
 import Icon from './Icon'
@@ -55,7 +55,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
   })
   const entry = useQuery({
     queryKey: ['verify-entry', pred.pubkey], retry: 0, queryFn: async () => {
-      const rec = await pickOddsFor(fixtureId, Number(pred.entryTs), market)
+      const rec = await pickArchivedAt(fixtureId, Number(pred.entryTs), market)
       if (!rec) throw new Error('entry record not found')
       const val = await txline.oddsValidation(rec.MessageId, rec.Ts)
       return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[market.priceIndex]), root: val.summary.oddsSubTreeRoot }
@@ -63,7 +63,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
   })
   const close = useQuery({
     queryKey: ['verify-close', pred.pubkey], enabled: !!pred.closeTs && Number(pred.closeTs) > 0, retry: 0, queryFn: async () => {
-      const rec = await pickOddsFor(fixtureId, Number(pred.closeTs), market)
+      const rec = await pickArchivedAt(fixtureId, Number(pred.closeTs), market)
       if (!rec) throw new Error('closing record not found')
       const val = await txline.oddsValidation(rec.MessageId, rec.Ts)
       return { ok: await verifyOdds(txo, val), pct: probPct(val.odds.Prices[market.priceIndex]), root: val.summary.oddsSubTreeRoot }

@@ -183,25 +183,74 @@ export function predicateFor(market: MarketDef): { comparison: any; op: any; thr
 }
 
 /**
- * The odds record for a market at/as-of a time. Must match `bind_odds` exactly:
+ * Does a raw TxLINE offer settle exactly this market? Must match `bind_odds`:
  * an authentic `half=1` quote is a real record that settles a different bet.
  */
-export function findOdds(offers: any[], market: MarketDef): any | null {
+export function matchesMarket(o: any, market: MarketDef): boolean {
   const kind = marketKey(market.marketArg);
-  const wantType = SUPER_TYPE[kind];
-  const wantPeriod = periodStr(market.period);
+  if (o.SuperOddsType !== SUPER_TYPE[kind]) return false;
+  if ((o.MarketPeriod ?? null) !== periodStr(market.period)) return false;
+  if (!Array.isArray(o.Prices) || o.Prices.length <= market.priceIndex) return false;
+  if (kind === "result1X2") return o.MarketParameters == null;
+  return parseLineX10(o.MarketParameters) === market.lineX10;
+}
+
+export function findOdds(offers: any[], market: MarketDef, opts?: { closingOnly?: boolean }): any | null {
   return offers.find((o) => {
-    if (o.SuperOddsType !== wantType) return false;
-    if ((o.MarketPeriod ?? null) !== wantPeriod) return false;
-    if (!Array.isArray(o.Prices) || o.Prices.length <= market.priceIndex) return false;
-    if (kind === "result1X2") return o.MarketParameters == null;
-    return parseLineX10(o.MarketParameters) === market.lineX10;
+    // A closing line must be a genuine pre-kickoff quote; settle_close rejects
+    // in-play lines (ClvError::LineIsInPlay).
+    if (opts?.closingOnly && o.InRunning) return false;
+    return matchesMarket(o, market);
   }) ?? null;
 }
 
-export async function pickOddsFor(fixtureId: number, asOf: number, market: MarketDef): Promise<any | null> {
+export async function pickOddsFor(fixtureId: number, asOf: number, market: MarketDef, opts?: { closingOnly?: boolean }): Promise<any | null> {
   const d = await txline.oddsSnapshot(fixtureId, asOf).catch(() => []);
-  return Array.isArray(d) ? findOdds(d, market) : null;
+  return Array.isArray(d) ? findOdds(d, market, opts) : null;
+}
+
+const CLOSE_WINDOW_MS = 3 * 60 * 60_000; // 3h of pre-kickoff market — mirrors the replay ladder
+const CLOSE_BUCKET_MS = 5 * 60_000;
+
+/**
+ * The closing line for a *finished* fixture. `/odds/snapshot` is forward-looking
+ * and returns the final in-play state, so once a match is over it can never yield a
+ * pre-kickoff quote (settle_close rejects those: ClvError::LineIsInPlay). The
+ * archived replay ladder (`/odds/updates`) can: pull the pre-kickoff 5-min buckets
+ * and take the last non-in-running quote for this market at or before the proven
+ * kickoff — exactly the record settle_close will accept.
+ */
+export async function pickClosingLine(fixtureId: number, kickoff: number, market: MarketDef): Promise<any | null> {
+  const buckets: Promise<any[]>[] = [];
+  for (let t = kickoff - CLOSE_WINDOW_MS; t <= kickoff; t += CLOSE_BUCKET_MS) {
+    const d = new Date(t);
+    buckets.push(
+      txline.oddsUpdates(Math.floor(t / 86_400_000), d.getUTCHours(), Math.floor(d.getUTCMinutes() / 5), fixtureId).catch(() => []),
+    );
+  }
+  const seen = new Set<string>();
+  const candidates = (await Promise.all(buckets)).flat()
+    .filter((o) => Number(o?.FixtureId) === fixtureId && o?.MessageId && !seen.has(o.MessageId) && seen.add(o.MessageId))
+    .filter((o) => !o.InRunning && Number(o.Ts) <= kickoff && matchesMarket(o, market))
+    .sort((a, b) => Number(b.Ts) - Number(a.Ts)); // newest pre-kickoff first
+  return candidates[0] ?? null;
+}
+
+/**
+ * The exact archived record the chain committed at `ts` for a market — the source
+ * of truth for re-proving a settled entry/close. `/odds/snapshot` is forward-looking
+ * and cannot return a past record once a fixture is finished, so read the replay
+ * ladder bucket around `ts` and match the exact timestamp.
+ */
+export async function pickArchivedAt(fixtureId: number, ts: number, market: MarketDef): Promise<any | null> {
+  const seen = new Set<string>();
+  const buckets = [ts - CLOSE_BUCKET_MS, ts, ts + CLOSE_BUCKET_MS].map((t) => {
+    const d = new Date(t);
+    return txline.oddsUpdates(Math.floor(t / 86_400_000), d.getUTCHours(), Math.floor(d.getUTCMinutes() / 5), fixtureId).catch(() => []);
+  });
+  return (await Promise.all(buckets)).flat()
+    .filter((o) => Number(o?.FixtureId) === fixtureId && o?.MessageId && !seen.has(o.MessageId) && seen.add(o.MessageId))
+    .find((o) => Number(o.Ts) === ts && matchesMarket(o, market)) ?? null;
 }
 
 /** Full-match 1X2 at/as-of a time. */

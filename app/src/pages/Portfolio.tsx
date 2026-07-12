@@ -4,7 +4,7 @@ import { PublicKey } from '@solana/web3.js'
 import { useClv } from '../state/useClv'
 import { listPredictions, proveEntry, settleClose, settleOutcome, voidPrediction, provenKickoff } from '../chain/actions'
 import { useFixtures } from '../state/fixtures'
-import { marketFromAccount, pickOddsFor } from '../lib/domain'
+import { marketFromAccount, pickOddsFor, pickClosingLine } from '../lib/domain'
 import { Card, Button, Badge, CLV } from '../components/ui'
 import Icon from '../components/Icon'
 import Flag from '../components/Flag'
@@ -74,12 +74,12 @@ export default function Portfolio() {
     try {
       const start = await provenKickoff(clv, Number(p.fixtureId))
       const m = marketOf(p)
-      // The closing line is the last quote before the whistle; the program refuses
-      // anything timestamped after the proven kickoff or flagged in-play.
-      const closeRec = (await pickOddsFor(Number(p.fixtureId), start - 60_000, m))
-        ?? (await pickOddsFor(Number(p.fixtureId), start - 300_000, m))
-        ?? (await pickOddsFor(Number(p.fixtureId), start - 900_000, m))
-      if (!closeRec) throw new Error('no closing line found')
+      // The closing line is the last pre-kickoff quote; the program refuses anything
+      // timestamped after the proven kickoff or flagged in-play. /odds/snapshot is
+      // forward-looking and returns the final in-play state for a finished fixture,
+      // so the closing line comes from the archived replay ladder instead.
+      const closeRec = await pickClosingLine(Number(p.fixtureId), start, m)
+      if (!closeRec) throw new Error('no pre-kickoff closing line found in the archive for this market')
       const sig = await settleClose(clv, new PublicKey(p.pubkey), Number(p.fixtureId), closeRec, m.priceIndex)
       toast.success('Closing line proven', { href: explorerTx(sig) })
       qc.invalidateQueries({ queryKey: ['predictions'] })
