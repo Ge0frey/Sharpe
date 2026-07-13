@@ -121,6 +121,7 @@ The duel stake is never TxL. The TxLINE credit token is locked to its program fo
 
 ## Documentation
 
+- [/docs in the app](https://sharpe-dusky.vercel.app/docs). The full documentation, rendered inside the product: concepts, guides, the instruction surface, and every guard by name.
 - [docs/USER-FLOW.md](docs/USER-FLOW.md). Start here. Every step from a cold browser tab to a settled bet and a paid escrow, naming the file and instruction at each point.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). What was built, and every fact confirmed against devnet.
 

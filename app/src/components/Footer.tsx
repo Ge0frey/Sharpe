@@ -11,6 +11,7 @@ const EXPLORE = [
   { to: '/matches', label: 'Matches' },
   { to: '/portfolio', label: 'Portfolio' },
   { to: '/leaderboard', label: 'Leaderboard' },
+  { to: '/docs', label: 'Docs' },
 ]
 
 const ringDark =

@@ -11,6 +11,7 @@ const NAV: { to: string; label: string; prefix?: string }[] = [
   { to: '/duels', label: 'Duels' },
   { to: '/portfolio', label: 'Portfolio' },
   { to: '/leaderboard', label: 'Leaderboard' },
+  { to: '/docs', label: 'Docs', prefix: '/docs' },
 ]
 
 const SPEEDS = [1, 10, 30, 60]

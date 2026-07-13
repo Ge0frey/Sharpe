@@ -11,6 +11,7 @@ import MatchDetail from './pages/MatchDetail'
 import Portfolio from './pages/Portfolio'
 import Leaderboard from './pages/Leaderboard'
 import Duels from './pages/Duels'
+import Docs from './pages/docs/Docs'
 
 /** Constrained column for the in-app screens. The landing is full-bleed and opts out. */
 function Shell({ children }: { children: ReactNode }) {
@@ -30,6 +31,8 @@ export default function App() {
         <Route path="/duels" element={<Shell><DataGate><Duels /></DataGate></Shell>} />
         <Route path="/portfolio" element={<Shell><Portfolio /></Shell>} />
         <Route path="/leaderboard" element={<Shell><Leaderboard /></Shell>} />
+        {/* Docs brings its own three-column shell (sidebar · article · on-this-page). */}
+        <Route path="/docs/:slug?" element={<Docs />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
