@@ -122,9 +122,7 @@ The duel stake is never TxL. The TxLINE credit token is locked to its program fo
 ## Documentation
 
 - [docs/USER-FLOW.md](docs/USER-FLOW.md). Start here. Every step from a cold browser tab to a settled bet and a paid escrow, naming the file and instruction at each point.
-- [docs/SUBMISSION.md](docs/SUBMISSION.md). Technical overview, settlement guards, endpoint list.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). What was built, and every fact confirmed against devnet.
-- [docs/FEEDBACK.md](docs/FEEDBACK.md). Our experience with the TxLINE API.
 
 ## Layout
 

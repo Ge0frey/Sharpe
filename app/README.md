@@ -39,7 +39,7 @@ Copy `.env.example` to `.env.local`. Vite inlines `VITE_*` at **build** time, so
 
 | Var | Purpose |
 |---|---|
-| `VITE_TXLINE_API` | TxLINE host, default `https://txline-dev.txodds.com` |
+| `VITE_TXLINE_API` | API base, default `/txapi` — a same-origin path proxied to `https://txline-dev.txodds.com` (dev via `vite.config.ts`, prod via `vercel.json`) to dodge CORS. Direct cross-origin calls are blocked |
 | `VITE_RPC_URL` | Solana RPC. Use a dedicated RPC (e.g. Helius) — `api.devnet.solana.com` throttles the `getProgramAccounts` calls that Portfolio, Duels and Leaderboard make every render |
 | `VITE_CLV_PROGRAM` | Display-only (Footer, Landing). The program the app actually talks to comes from `src/chain/idl/clv.json`'s `address` field |
 | `VITE_TXORACLE_PROGRAM` | Display-only |
@@ -73,6 +73,6 @@ src/
 ## Build notes
 
 - `src/polyfills.ts` must run before any `@solana/*` module reads `Buffer` at module scope. `vite.config.ts` pre-bundles `buffer`, `@solana/spl-token`, `@solana/web3.js` and `@coral-xyz/anchor` and aliases bare `buffer` → `buffer/` (trailing slash forces the npm package, not Vite's browser stub).
-- `vercel.json` rewrites all paths to `/index.html` (SPA) and sets `nosniff`, `DENY` framing, and a strict referrer policy.
+- `vercel.json` proxies `/txapi/*` to `https://txline-dev.txodds.com/*` (CORS), rewrites all other paths to `/index.html` (SPA), and sets `nosniff`, `DENY` framing, and a strict referrer policy.
 
 See the [root README](../README.md) for the on-chain program, settlement guards, and deployed addresses, and [docs/USER-FLOW.md](../docs/USER-FLOW.md) for the full cold-tab-to-settled-bet walkthrough.

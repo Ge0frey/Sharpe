@@ -74,7 +74,13 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
       // The stat keys the CHAIN settled on. A first-half bet is keys 1001/1002;
       // proving keys 1/2 would re-prove a different match period entirely.
       const { val, a, b } = await finalStat(fixtureId, pred.statAKey, pred.hasStatB ? pred.statBKey : undefined)
-      return { ok: await verifyStat(txo, val, pred), p1: a, p2: b, root: val.summary.eventStatsSubTreeRoot }
+      // validate_stat errors on an invalid proof and returns the PREDICATE result
+      // (bet won / lost) on a valid one — unlike validate_odds/validate_fixture,
+      // whose bool means "proof valid". So reaching this line already means the
+      // score is proven on-chain; a lost bet is still a proven outcome. `ok` tracks
+      // proof validity, `win` carries the settlement.
+      const win = await verifyStat(txo, val, pred)
+      return { ok: true, win, p1: a, p2: b, root: val.summary.eventStatsSubTreeRoot }
     },
   })
 
@@ -131,7 +137,7 @@ export default function VerifyModal({ pred, fixture, onClose }: { pred: any; fix
           <Row n="02" title="Entry line" sub="validate_odds" q={entry} delay={120} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
           <Row n="03" title="Closing line" sub="validate_odds" q={close} delay={200} render={(d) => <>implied {d.pct.toFixed(2)}% · odds root {trunc(d.root)}</>} />
           <Row n="04" title="Match result" sub="validate_stat" q={outcome} delay={280}
-            render={(d) => <>keys {pred.statAKey}{pred.hasStatB ? `/${pred.statBKey}` : ''} = {d.p1}{d.p2 !== undefined ? `–${d.p2}` : ''} · scores root {trunc(d.root)}</>} />
+            render={(d) => <>keys {pred.statAKey}{pred.hasStatB ? `/${pred.statBKey}` : ''} = {d.p1}{d.p2 !== undefined ? `–${d.p2}` : ''} · scores root {trunc(d.root)} · bet {d.win ? 'won' : 'lost'}</>} />
         </div>
 
         {/* Footer */}
