@@ -1,8 +1,16 @@
+## QUICK LINKS:
+
+#### Detailed Demo video: https://youtu.be/__jdQw28Rlc
+#### Live link: https://sharpexodds.vercel.app/
+#### Detailed docs: https://sharpexodds.vercel.app/docs
+#### Launch video: https://x.com/historiah_hq/status/2076572867408326663?s=20
+#### X Devlog: 
+
+---
+
 # Sharpe
 
 Prove you can beat a betting market. Or find out that you can't. Built on TxLINE and Solana, for the 2026 World Cup.
-
-**Live:** https://sharpexodds.vercel.app (Solana devnet)
 
 Betting products ask you to trust three numbers: the price you were given, the price the market closed at, and the result. Sharpe proves all three against Merkle roots that TxLINE publishes on Solana, then scores you on the one that measures skill.
 
