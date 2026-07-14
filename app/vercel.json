@@ -2,6 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/txapi/:path*", "destination": "https://txline-dev.txodds.com/:path*" },
+    { "source": "/docs", "destination": "/docs.html" },
+    { "source": "/docs/:path*", "destination": "/docs.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

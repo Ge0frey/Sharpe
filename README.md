@@ -2,7 +2,7 @@
 
 Prove you can beat a betting market. Or find out that you can't. Built on TxLINE and Solana, for the 2026 World Cup.
 
-**Live:** https://sharpe-dusky.vercel.app (Solana devnet)
+**Live:** https://sharpexodds.vercel.app (Solana devnet)
 
 Betting products ask you to trust three numbers: the price you were given, the price the market closed at, and the result. Sharpe proves all three against Merkle roots that TxLINE publishes on Solana, then scores you on the one that measures skill.
 
@@ -121,7 +121,7 @@ The duel stake is never TxL. The TxLINE credit token is locked to its program fo
 
 ## Documentation
 
-- [/docs in the app](https://sharpe-dusky.vercel.app/docs). The full documentation, rendered inside the product: concepts, guides, the instruction surface, and every guard by name.
+- [/docs in the app](https://sharpexodds.vercel.app/docs). The full documentation, rendered inside the product: concepts, guides, the instruction surface, and every guard by name.
 - [docs/USER-FLOW.md](docs/USER-FLOW.md). Start here. Every step from a cold browser tab to a settled bet and a paid escrow, naming the file and instruction at each point.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). What was built, and every fact confirmed against devnet.
 

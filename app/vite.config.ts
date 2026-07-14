@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -26,6 +27,17 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+  },
+  build: {
+    rollupOptions: {
+      // Two HTML entries so /docs ships its own crawlable <head> (X card,
+      // OG tags) while booting the same SPA bundle. Vercel rewrites /docs*
+      // to /docs.html; see vercel.json.
+      input: {
+        index: resolve(__dirname, 'index.html'),
+        docs: resolve(__dirname, 'docs.html'),
+      },
+    },
   },
   server: {
     // TxOdds' API sends no CORS headers, so the browser blocks direct calls.

@@ -120,7 +120,7 @@ function Quickstart() {
       <H2 id="use-the-live-app">Use the live app</H2>
       <P>
         The production build runs at{' '}
-        <ExtLink href="https://sharpe-dusky.vercel.app">sharpe-dusky.vercel.app</ExtLink> against Solana devnet.
+        <ExtLink href="https://sharpexodds.vercel.app">sharpexodds.vercel.app</ExtLink> against Solana devnet.
       </P>
       <Steps
         items={[

@@ -116,7 +116,7 @@ function Addresses() {
           ['TxLINE API host (devnet)', <Code>https://txline-dev.txodds.com</Code>],
           ['Duel stake mint (devnet USDT, classic SPL)', <Code>ELWTKspHKCnCfCiCiqYw1EDH77k8VCP74dK9qytG2Ujh</Code>],
           ['TxL credit mint (Token-2022, data access only)', <Code>4Zao8ocPhmMgq7PdsYWyxvqySMGx7xb9cMftPMkEokRG</Code>],
-          ['Live app', <ExtLink href="https://sharpe-dusky.vercel.app">sharpe-dusky.vercel.app</ExtLink>],
+          ['Live app', <ExtLink href="https://sharpexodds.vercel.app">sharpexodds.vercel.app</ExtLink>],
         ]}
         firstColBold={false}
       />

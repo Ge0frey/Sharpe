@@ -2,7 +2,7 @@
 
 The React frontend for [Sharpe](../README.md): commit predictions, prove entry and closing lines against TxLINE's Merkle roots on Solana, and settle CLV bets and prop duels. Talks to the `clv` program on Solana devnet and the TxLINE World Cup data tier. No backend of its own — every proof and settlement is a permissionless on-chain call the UI exposes as a button.
 
-**Live:** https://sharpe-dusky.vercel.app (Solana devnet)
+**Live:** https://sharpexodds.vercel.app (Solana devnet)
 
 ## Stack
 

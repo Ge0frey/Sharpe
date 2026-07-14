@@ -38,7 +38,7 @@ txoracle (6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J)
 
 Data flows one way: API, then pure functions, then chain, then UI. Everything provable is proven.
 
-**Deployment.** The app is a static build on Vercel at https://sharpe-dusky.vercel.app, with the project root set to `app/` and a rewrite sending every path to `index.html`, because the router uses history mode. Vite inlines every `VITE_*` variable into the bundle at build time, so no secret may be passed that way. The only variables are the API host, the RPC URL, and two program ids, all of which have defaults in `app/src/config.ts`.
+**Deployment.** The app is a static build on Vercel at https://sharpexodds.vercel.app, with the project root set to `app/` and a rewrite sending every path to `index.html`, because the router uses history mode. Vite inlines every `VITE_*` variable into the bundle at build time, so no secret may be passed that way. The only variables are the API host, the RPC URL, and two program ids, all of which have defaults in `app/src/config.ts`.
 
 ## 2. The three verifiers
 
