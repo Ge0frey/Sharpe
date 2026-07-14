@@ -4,17 +4,17 @@
 #### Live link: https://sharpexodds.vercel.app/
 #### Detailed docs: https://sharpexodds.vercel.app/docs
 #### Launch video: https://x.com/historiah_hq/status/2076572867408326663?s=20
-#### X Devlog: 
+#### X Devlog: https://x.com/historiah_hq/status/2076931612395090318?s=20
 
 ---
 
 # Sharpe
 
-Prove you can beat a betting market. Or find out that you can't. Built on TxLINE and Solana, for the 2026 World Cup.
+Sharpe lets you prove you can beat a betting market, or find out you can't. You make a World Cup call before kickoff, and the app proves three things on-chain against the Merkle roots TxLINE publishes on Solana: the price you were given, the price the market closed at, and the final result. From those it computes Closing Line Value, the number professional bettors use to measure skill instead of luck.
 
-Betting products ask you to trust three numbers: the price you were given, the price the market closed at, and the result. Sharpe proves all three against Merkle roots that TxLINE publishes on Solana, then scores you on the one that measures skill.
+The point is that a bet can win and still be bad. In our own devnet history, a bet on USA won but had negative CLV, because you paid 72.1% for something the market priced at 71.6% by kickoff. Outcomes are noisy, prices are not.
 
-There is no oracle to trust and no admin who can change an outcome.
+There is no oracle to trust and no admin who can change an outcome. Our program calls these TxLINE verifiers, validate_fixture, validate_odds, and validate_stat, and settles as a pure function of the published root and the terms you fixed before the answer existed. A second surface handles prop duels, corners and cards that carry no consensus line, settled with a devnet USDT escrow that has no admin key on any money path.
 
 ## The point, in one number
 
